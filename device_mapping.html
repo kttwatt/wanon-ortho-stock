@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>จับคู่อุปกรณ์ ↔ รหัสสิทธิ์เบิก | รพ.วานรนิวาส</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #f2f4f8;
+    font-family: 'Noto Sans Thai', 'Sarabun', sans-serif;
+    color: #1f2937;
+  }
+  .container { max-width: 900px; margin: 0 auto; padding: 16px 16px 100px; }
+  header { margin-bottom: 16px; }
+  header h1 { color: #0f766e; font-size: 20px; margin: 0 0 4px; }
+  header p { margin: 0; font-size: 13px; color: #6b7280; }
+  nav.pagenav { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  nav.pagenav a {
+    font-size: 12.5px; color: #0f766e; text-decoration: none;
+    background: #fff; border: 1px solid #ccfbf1; padding: 6px 12px;
+    border-radius: 999px; font-weight: 600;
+  }
+  nav.pagenav a:hover { background: #f0fdfa; }
+  nav.pagenav a.current { background: #0f766e; color: #fff; border-color: #0f766e; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .card-head h2 { font-size: 15px; margin: 0; color: #111827; }
+  button { font-family: inherit; }
+  button.primary {
+    background: #0f766e; color: #fff; border: none;
+    padding: 9px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;
+  }
+  button.primary:hover { background: #0d5f58; }
+  button.secondary {
+    background: #e5e7eb; color: #1f2937; border: none;
+    padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;
+  }
+  button.secondary:hover { background: #d1d5db; }
+  button.danger {
+    background: #fee2e2; color: #b91c1c; border: none;
+    padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; margin-left: 4px;
+  }
+  button.danger:hover { background: #fecaca; }
+  .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid #e5e7eb; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  col.col-device { width: 24%; }
+  col.col-vendor { width: 8%; }
+  col.col-code { width: 15%; }
+  col.col-rights { width: 30%; }
+  col.col-note { width: 12%; }
+  col.col-actions { width: 11%; }
+  thead th {
+    background: #0f766e; color: #fff; padding: 10px 8px; text-align: left;
+    font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  tbody td { padding: 8px 8px; border-bottom: 1px solid #e5e7eb; vertical-align: top; overflow: hidden; }
+  tbody tr:hover { background: #f8fafc; }
+  input, select {
+    width: 100%; padding: 6px 7px; border: 1px solid #d1d5db; border-radius: 6px;
+    font-size: 13px; font-family: inherit; background: #fff;
+  }
+  input:disabled, select:disabled { background: #f9fafb; color: #374151; border-color: transparent; }
+  .badge-pending { color: #b45309; font-weight: 600; font-size: 12.5px; }
+  .price-main { font-weight: 700; color: #0f766e; }
+  .price-sub { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .muted { color: #9ca3af; }
+  footer.bar {
+    position: sticky; bottom: 12px;
+    max-width: 900px; margin: 0 auto;
+    background: #fff; border: 1px solid #e5e7eb;
+    padding: 12px 16px; border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.1);
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    flex-wrap: wrap;
+  }
+  .bar-count { font-size: 14px; }
+  .bar-count b { color: #0f766e; }
+  @media (max-width: 480px) {
+    header h1 { font-size: 18px; }
+    footer.bar { flex-direction: column; align-items: stretch; text-align: center; }
+  }
+
+  /* --- ส่วนกรองหมวด --- */
+  .filter-wrap { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #374151; }
+  .filter-wrap select {
+    width: auto; min-width: 150px; padding: 6px 8px;
+  }
+
+  /* --- แถวหัวหมวด (section header) --- */
+  tr.section-row td {
+    font-weight: 700;
+    padding: 8px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #111827;
+    font-size: 13px;
+  }
+  tr.section-row:hover { background: inherit !important; }
+
+  /* --- เซลล์ "อุปกรณ์" (edit mode): ชื่อรายการเด่น + ชนิด/ครอบครัวเล็กใต้ชื่อ --- */
+  .item-name-input {
+    font-weight: 700;
+    font-size: 13.5px;
+    color: #111827;
+    margin-bottom: 4px;
+  }
+  .family-select {
+    font-size: 11.5px;
+    color: #6b7280;
+    padding: 3px 5px;
+  }
+
+  /* --- เซลล์ "รหัสเบิก": label ชัดเจนเหนือ dropdown --- */
+  .field-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #0f766e;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+  }
+
+  /* --- view mode: ข้อความล้วน (ไม่ใช่ dropdown/input) --- */
+  .item-name-view {
+    font-weight: 700;
+    font-size: 13.5px;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .family-view {
+    font-size: 11.5px;
+    color: #6b7280;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .vendor-view {
+    font-size: 13px;
+    color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .code-view-main {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .code-view-sub {
+    font-size: 11px;
+    color: #6b7280;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .note-view {
+    font-size: 13px;
+    color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* --- เซลล์ "รายการตามสิทธิ์ + ราคา" --- */
+  .rights-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .rights-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-weight: 600;
+    font-size: 12.5px;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .rights-unit {
+    flex: 0 0 auto;
+    font-size: 10px;
+    color: #6b7280;
+    white-space: nowrap;
+  }
+  /* กริดราคา: 2 แถวเสมอ (หัวสิทธิ์ + ราคา) แนวโปร่ง ไม่มีกรอบรอบทุกคอลัมน์ */
+  .rights-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    width: 100%;
+    column-gap: 4px;
+  }
+  .rights-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+  }
+  .rights-col-label {
+    width: 100%;
+    font-weight: 700;
+    color: #0f766e;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    text-align: center;
+    padding-bottom: 2px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .rights-col-value {
+    width: 100%;
+    font-weight: 700;
+    color: #111827;
+    font-size: 11.5px;
+    line-height: 1.2;
+    min-height: 1.2em;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>จับคู่อุปกรณ์ ↔ รหัสสิทธิ์เบิก</h1>
+    <p>โรงพยาบาลวานรนิวาส — เลือกรหัสสิทธิ์ให้แต่ละอุปกรณ์ เพื่อดึงชื่อรายการและราคาเบิกได้อัตโนมัติ</p>
+    <nav class="pagenav">
+      <a href="lockingscrew35_usage_form.html">📋 บันทึกการใช้อุปกรณ์</a>
+      <a href="device_mapping.html" class="current">🔗 จับคู่-รหัสเบิก</a>
+      <a href="edit_claim_code.html">🛠️ แก้ไขรหัสเบิก</a>
+    </nav>
+  </header>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>รายการอุปกรณ์</h2>
+      <div class="filter-wrap">
+        <label for="categoryFilter">หมวด</label>
+        <select id="categoryFilter">
+          <option value="all">ทั้งหมด</option>
+        </select>
+        <label for="vendorFilter">บริษัท</label>
+        <select id="vendorFilter">
+          <option value="all">ทั้งหมด</option>
+        </select>
+      </div>
+      <button class="primary" id="addBtn">＋ เพิ่มอุปกรณ์</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <colgroup>
+          <col class="col-device">
+          <col class="col-vendor">
+          <col class="col-code">
+          <col class="col-rights">
+          <col class="col-note">
+          <col class="col-actions">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>อุปกรณ์</th>
+            <th>บริษัท</th>
+            <th>รหัสเบิก</th>
+            <th>รายการตามสิทธิ์ + ราคา</th>
+            <th>หมายเหตุ</th>
+            <th>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<footer class="bar">
+  <div class="bar-count">จับคู่แล้ว <b id="matchedCount">0</b> / <span id="totalCount">0</span> รายการ</div>
+  <button class="primary" id="saveBtn">💾 บันทึก</button>
+</footer>
+
+<script>
+  // สิทธิ์ที่รองรับ + ลำดับแสดงผล
+  const RIGHT_KEYS = ['UCS', 'OFC', 'LGO', 'NHS', 'PVT'];
+
+  // ที่มา: GSheet "ระบบรายการอุปกรณ์เบิกได้ตามสิทธิ 2569"
+  const RIGHTS = {
+    '7301': { name: 'สกรูยึดแผ่นโลหะชนิดหัวล็อก (Lock screw)', short: 'Lock screw', unit: 'ตัว',
+      prices: { UCS: 1600, OFC: 2400, LGO: 2400, NHS: 2400, PVT: 2400 } },
+    '7302': { name: 'สกรูยึดแผ่นโลหะดามกระดูก (Cortex screw)', short: 'Cortex screw', unit: 'ตัว',
+      prices: { UCS: 270, OFC: 300, LGO: 300, NHS: 300, PVT: 300 } },
+    '7313': { name: 'K-wire', short: 'K-wire', unit: 'เส้น',
+      prices: { UCS: 200, OFC: 300, LGO: 300, NHS: 300, PVT: 300 } },
+    '7315': { name: 'สกรูยึดกระดูกชนิดมีรูสอดแกนนำทาง (Cannulated screw)', short: 'Cannulated screw', unit: 'ตัว',
+      prices: { UCS: 2000, OFC: 3000, LGO: 3000, NHS: 3000, PVT: 3000 } },
+    '7312': { name: 'ลวด (Cerclage wire)', short: 'Cerclage wire', unit: 'เส้น',
+      prices: { UCS: null, OFC: 1500, LGO: 1500, NHS: 1500, PVT: 1500 } },
+    '7210': { name: 'แผ่นโลหะดามกระดูก ชนิดแคบ (Narrow plate)', short: 'Narrow plate', unit: 'ชิ้น',
+      prices: { UCS: 2200, OFC: 5000, LGO: 5000, NHS: 5000, PVT: 5000 } },
+    '7212': { name: 'แผ่นโลหะดามกระดูก ชนิดเล็ก (Small fragment plate)', short: 'Small fragment plate', unit: 'ชิ้น',
+      prices: { UCS: 1300, OFC: 1500, LGO: 1500, NHS: 1500, PVT: 1500 } },
+    '7214': {
+      name: 'แผ่นโลหะดามกระดูก ชนิดหัวล็อก (Locking compression plate)', short: 'Locking plate', unit: 'ชิ้น',
+      variants: {
+        A: { label: 'A — Locking compression plate', prices: { UCS: 10000, OFC: 10000, LGO: 10000, NHS: 10000, PVT: 10000 } },
+        B: { label: 'B — ชนิดหัวล็อกสำหรับใส่ข้อ (Distal radius)', prices: { UCS: 17000, OFC: 17000, LGO: 17000, NHS: 17000, PVT: 17000 } }
+      }
+    },
+    '7207': {
+      name: 'แผ่นดามกระดูกสันหลัง ส่วนคอ (Cervical locking plate)', short: 'Cervical plate', unit: 'ระดับ',
+      variants: {
+        A: { label: 'A — 24,000 บาท/ระดับ', prices: { UCS: 24000, OFC: 24000, LGO: 24000, NHS: 24000, PVT: 24000 } },
+        B: { label: 'B — 12,000 บาท/ระดับ', prices: { UCS: 12000, OFC: 12000, LGO: 12000, NHS: 12000, PVT: 12000 } }
+      }
+    }
+  };
+
+  const VENDORS = ['Emerson', 'รพ.', 'Rockwood', 'MDC'];
+
+  // --- หมวดอุปกรณ์: ลำดับตามที่ Kit เน้น Screws และ K-wire ไว้บนๆ ---
+  const CATEGORY_ORDER = ['screw-cortex', 'screw-locking', 'screw-cancellous', 'cannulated', 'kwire', 'plate', 'wire'];
+  const CATEGORIES = {
+    'screw-cortex':     { label: 'Cortex screws',     icon: '🔩', color: '#dbeafe' },
+    'screw-locking':    { label: 'Locking screws',    icon: '🔩', color: '#e0e7ff' },
+    'screw-cancellous': { label: 'Cancellous screws', icon: '🔩', color: '#fce7f3' },
+    'cannulated':       { label: 'Cannulated screws',      icon: '🔩', color: '#fef3c7' },
+    'kwire':            { label: 'K-wire',          icon: '📌', color: '#dcfce7' },
+    'plate':            { label: 'เพลท',            icon: '🛡️', color: '#fee2e2' },
+    'wire':             { label: 'ลวด',             icon: '🧵', color: '#ede9fe' }
+  };
+
+  let idCounter = 11;
+  // K-wire ทุกขนาด (ตาม pricelist Sigma+AOSYS): dia 0.8–2.5 = 60฿(150mm)/85฿(300mm), dia 3.0 = 120/220; รหัสสิทธิ์ 7313
+  const kwireDias = [0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.5, 3.0];
+  const kwireLens = [150, 300];
+  let kid = 100;
+  const kwireRows = [];
+  kwireLens.forEach(len => kwireDias.forEach(dia => {
+    kwireRows.push({ id: kid++, category: 'kwire', family: 'K-wire', itemName: `K-wire ${dia}×${len}mm`, vendor: 'รพ.', code: '7313', variant: '', note: '', locked: true });
+  }));
+  const devices = [
+    { id: 1, category: 'screw-locking', family: 'Locking screws 3.5', itemName: 'Self Tapping Locking screw 3.5×30mm', vendor: 'Emerson', code: '7301', variant: '', note: '', locked: true },
+    { id: 2, category: 'screw-locking', family: 'Locking screws 3.5', itemName: 'Self Tapping Locking screw 3.5×50mm', vendor: 'Emerson', code: '7301', variant: '', note: '', locked: true },
+    { id: 3, category: 'screw-cortex', family: 'Cortex screws', itemName: 'Cortex screw 3.5×24mm', vendor: 'รพ.', code: '7302', variant: '', note: '', locked: true },
+    { id: 4, category: 'screw-cortex', family: 'Cortex screws', itemName: 'Cortex screw 4.5×40mm', vendor: 'รพ.', code: '7302', variant: '', note: '', locked: true },
+    ...kwireRows,
+    { id: 7, category: 'cannulated', family: 'Cannulated screws', itemName: 'Cannulated Locking screw 6.5×60mm', vendor: 'Emerson', code: '7315', variant: '', note: '', locked: true },
+    { id: 8, category: 'wire', family: 'Cerclage wire', itemName: 'Cerclage wire 18 gauge', vendor: 'Emerson', code: '7312', variant: '', note: '', locked: true },
+    { id: 9, category: 'plate', family: 'เพลท DCP', itemName: 'Small DCP Plate 4H L', vendor: 'รพ.', code: '7214', variant: 'A', note: '', locked: true },
+    { id: 10, category: 'plate', family: 'เพลทหัวล็อก Distal Radius', itemName: 'Distal Radius Locking Plate 2H L (VA)', vendor: 'Rockwood', code: '7214', variant: 'B', note: '', locked: true }
+  ];
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function money(n) {
+    return n == null ? null : n.toLocaleString('th-TH');
+  }
+
+  function getRightsInfo(code, variant) {
+    const r = RIGHTS[code];
+    if (!r) return null;
+    if (r.variants) {
+      const v = r.variants[variant];
+      if (!v) return null;
+      return { name: r.name + ' — รุ่น ' + v.label, unit: r.unit, prices: v.prices };
+    }
+    return { name: r.name, unit: r.unit, prices: r.prices };
+  }
+
+  function isMatched(d) {
+    const r = RIGHTS[d.code];
+    if (!d.code || !r) return false;
+    if (r.variants) return !!d.variant;
+    return true;
+  }
+
+  function vendorOptions(selected) {
+    return '<option value="">-- เลือก --</option>' +
+      VENDORS.map(v => `<option value="${v}" ${v === selected ? 'selected' : ''}>${v}</option>`).join('');
+  }
+
+  function codeOptions(selected) {
+    return '<option value="">-- เลือกรหัส --</option>' +
+      Object.keys(RIGHTS).map(c => `<option value="${c}" ${c === selected ? 'selected' : ''}>${c} · ${RIGHTS[c].short || RIGHTS[c].name.split(' (')[0]}</option>`).join('');
+  }
+
+  function variantOptions(code, selected) {
+    const r = RIGHTS[code];
+    if (!r || !r.variants) return '';
+    return '<option value="">เลือก</option>' +
+      Object.keys(r.variants).map(v => `<option value="${v}" ${v === selected ? 'selected' : ''}>${v}</option>`).join('');
+  }
+
+  // ชนิด/ครอบครัว (dropdown) → แมปหมวดอัตโนมัติ
+  const FAMILY_OPTIONS = [
+    { family: 'Cortex screws',            cat: 'screw-cortex' },
+    { family: 'Cancellous screws',        cat: 'screw-cancellous' },
+    { family: 'Locking screws 3.5',       cat: 'screw-locking' },
+    { family: 'Locking screws 2.7',       cat: 'screw-locking' },
+    { family: 'Locking screws 4.0',       cat: 'screw-locking' },
+    { family: 'Cannulated screws',       cat: 'cannulated' },
+    { family: 'K-wire',                 cat: 'kwire' },
+    { family: 'Cerclage wire',          cat: 'wire' },
+    { family: 'เพลท DCP',               cat: 'plate' },
+    { family: 'เพลท LC-DCP',            cat: 'plate' },
+    { family: 'เพลท Reconstruction',    cat: 'plate' },
+    { family: 'เพลท Tubular',           cat: 'plate' },
+    { family: 'เพลทหัวล็อกข้อใกล้ข้อ',   cat: 'plate' },
+    { family: 'เพลท Mini plate',        cat: 'plate' },
+    { family: 'เพลท Spinal',            cat: 'plate' },
+  ];
+  function familyOptions(selected) {
+    return '<option value="">-- เลือกชนิด --</option>' +
+      FAMILY_OPTIONS.map(f =>
+        `<option value="${f.family}" ${f.family === selected ? 'selected' : ''}>${f.family}</option>`
+      ).join('');
+  }
+  function familyToCategory(family) {
+    const f = FAMILY_OPTIONS.find(x => x.family === family);
+    return f ? f.cat : null;
+  }
+
+  function populateCategoryFilter() {
+    const sel = document.getElementById('categoryFilter');
+    const current = sel.value || 'all';
+    sel.innerHTML = '<option value="all">ทั้งหมด</option>' +
+      CATEGORY_ORDER.map(c => `<option value="${c}">${CATEGORIES[c].icon} ${CATEGORIES[c].label}</option>`).join('');
+    sel.value = current;
+    // vendor filter จาก VENDORS ลิสต์
+    const vsel = document.getElementById('vendorFilter');
+    const vcur = vsel.value || 'all';
+    vsel.innerHTML = '<option value="all">ทั้งหมด</option>' +
+      VENDORS.map(v => `<option value="${v}">${v}</option>`).join('');
+    vsel.value = vcur;
+  }
+
+  function rightsGridHtml(prices) {
+    return `<div class="rights-grid">${RIGHT_KEYS.map(k => {
+      const val = prices[k];
+      const valueTxt = val == null ? '&nbsp;' : money(val);
+      return `<div class="rights-col"><div class="rights-col-label">${k}</div><div class="rights-col-value">${valueTxt}</div></div>`;
+    }).join('')}</div>`;
+  }
+
+  // --- View mode: ข้อความล้วนสำหรับคอลัมน์ "รหัสเบิก" ---
+  function codeViewHtml(d) {
+    if (!d.code) {
+      return '<div class="code-view-main muted">— ⏳</div>';
+    }
+    const r = RIGHTS[d.code];
+    if (!r) {
+      return `<div class="code-view-main">${escapeHtml(d.code)}</div>`;
+    }
+    const shortName = r.short || r.name.split(' (')[0];
+    let html = `<div class="code-view-main" title="${escapeHtml(d.code + ' · ' + shortName)}">${escapeHtml(d.code)} · ${escapeHtml(shortName)}</div>`;
+    if (r.variants) {
+      const v = r.variants[d.variant];
+      html += v
+        ? `<div class="code-view-sub" title="${escapeHtml(v.label)}">${escapeHtml(v.label)}</div>`
+        : '<div class="code-view-sub muted">ยังไม่เลือกรุ่น</div>';
+    }
+    return html;
+  }
+
+  function rowHtml(d) {
+    const rights = RIGHTS[d.code];
+    const showVariant = rights && rights.variants;
+    const info = getRightsInfo(d.code, d.variant);
+
+    const rightsNameHtml = info
+      ? `<div class="rights-head"><div class="rights-name" title="${escapeHtml(info.name)}">${escapeHtml(info.name)}</div><div class="rights-unit">บาท/${escapeHtml(info.unit)}</div></div>`
+      : '<div class="badge-pending">⏳ ยังไม่จับคู่</div>';
+
+    let priceHtml = '<span class="muted">-</span>';
+    if (info) {
+      priceHtml = rightsGridHtml(info.prices);
+    }
+
+    let deviceCellHtml, vendorCellHtml, codeCellHtml, noteCellHtml;
+
+    if (d.locked) {
+      // --- VIEW MODE: ข้อความล้วน ---
+      deviceCellHtml =
+        `<div class="item-name-view" title="${escapeHtml(d.itemName)}">${d.itemName ? escapeHtml(d.itemName) : '—'}</div>` +
+        `<div class="family-view" title="${escapeHtml(d.family)}">${d.family ? escapeHtml(d.family) : '—'}</div>`;
+      vendorCellHtml = `<div class="vendor-view" title="${escapeHtml(d.vendor)}">${d.vendor ? escapeHtml(d.vendor) : '—'}</div>`;
+      codeCellHtml = codeViewHtml(d);
+      noteCellHtml = `<div class="note-view ${d.note ? '' : 'muted'}" title="${escapeHtml(d.note)}">${d.note ? escapeHtml(d.note) : '—'}</div>`;
+    } else {
+      // --- EDIT MODE: dropdown/input เหมือนเดิม ---
+      deviceCellHtml =
+        `<input class="item-name-input" data-field="itemName" value="${escapeHtml(d.itemName)}">` +
+        `<select class="family-select" data-field="family">${familyOptions(d.family)}</select>`;
+      vendorCellHtml = `<select data-field="vendor">${vendorOptions(d.vendor)}</select>`;
+      codeCellHtml =
+        `<select data-field="code">${codeOptions(d.code)}</select>` +
+        (showVariant ? `<select data-field="variant" style="margin-top:4px;">${variantOptions(d.code, d.variant)}</select>` : '');
+      noteCellHtml = `<input data-field="note" value="${escapeHtml(d.note)}" placeholder="—">`;
+    }
+
+    return `<tr data-id="${d.id}">
+      <td>${deviceCellHtml}</td>
+      <td>${vendorCellHtml}</td>
+      <td>${codeCellHtml}</td>
+      <td>${rightsNameHtml}${priceHtml}</td>
+      <td>${noteCellHtml}</td>
+      <td style="white-space:nowrap;">
+        <button class="secondary" data-action="toggle">${d.locked ? 'แก้ไข' : 'บันทึกแถว'}</button>
+        <button class="danger" data-action="delete">ลบ</button>
+      </td>
+    </tr>`;
+  }
+
+  function sectionRowHtml(catKey, count) {
+    const meta = CATEGORIES[catKey];
+    return `<tr class="section-row" style="background:${meta.color};"><td colspan="6">${meta.icon} ${meta.label} (${count})</td></tr>`;
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('tbody');
+    const catFilter = document.getElementById('categoryFilter').value || 'all';
+    const vendorFilter = document.getElementById('vendorFilter').value || 'all';
+
+    let html = '';
+    CATEGORY_ORDER.forEach(catKey => {
+      const items = devices.filter(d =>
+        d.category === catKey &&
+        (catFilter === 'all' || d.category === catFilter) &&
+        (vendorFilter === 'all' || d.vendor === vendorFilter)
+      );
+      if (items.length === 0) return;
+      html += sectionRowHtml(catKey, items.length);
+      html += items.map(rowHtml).join('');
+    });
+    tbody.innerHTML = html;
+    updateFooter();
+  }
+
+  function updateFooter() {
+    const matched = devices.filter(isMatched).length;
+    document.getElementById('matchedCount').textContent = matched;
+    document.getElementById('totalCount').textContent = devices.length;
+  }
+
+  document.getElementById('tbody').addEventListener('change', e => {
+    const tr = e.target.closest('tr');
+    if (!tr) return;
+    const id = Number(tr.dataset.id);
+    const d = devices.find(x => x.id === id);
+    if (!d) return;
+    const field = e.target.dataset.field;
+    if (!field) return;
+
+    if (field === 'code') {
+      d.code = e.target.value;
+      d.variant = '';
+    } else if (field === 'variant') {
+      d.variant = e.target.value;
+    } else if (field === 'family') {
+      d.family = e.target.value;
+      // เลือกชนิดแล้วตั้งหมวดให้อัตโนมัติ (ถ้ายังไม่ตรง)
+      const autoCat = familyToCategory(d.family);
+      if (autoCat) d.category = autoCat;
+    } else {
+      d[field] = e.target.value;
+    }
+    renderTable();
+  });
+
+  document.getElementById('tbody').addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const tr = e.target.closest('tr');
+    const id = Number(tr.dataset.id);
+    const d = devices.find(x => x.id === id);
+    if (!d) return;
+
+    if (btn.dataset.action === 'toggle') {
+      d.locked = !d.locked;
+      renderTable();
+    } else if (btn.dataset.action === 'delete') {
+      if (confirm('ต้องการลบอุปกรณ์นี้ออกจากรายการหรือไม่?')) {
+        const idx = devices.findIndex(x => x.id === id);
+        devices.splice(idx, 1);
+        renderTable();
+      }
+    }
+  });
+
+  document.getElementById('categoryFilter').addEventListener('change', renderTable);
+  document.getElementById('vendorFilter').addEventListener('change', renderTable);
+
+  document.getElementById('addBtn').addEventListener('click', () => {
+    devices.push({
+      id: idCounter++, category: 'screw-cortex', family: '', itemName: '', vendor: '', code: '', variant: '', note: '', locked: false
+    });
+    renderTable();
+    const wrap = document.querySelector('.table-wrap');
+    wrap.scrollTop = wrap.scrollHeight;
+  });
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    const matched = devices.filter(isMatched).length;
+    alert(`บันทึกข้อมูลเรียบร้อย\nอุปกรณ์ทั้งหมด: ${devices.length} รายการ\nจับคู่รหัสสิทธิ์แล้ว: ${matched} รายการ\nยังไม่จับคู่: ${devices.length - matched} รายการ`);
+  });
+
+  populateCategoryFilter();
+  renderTable();
+</script>
+
+</body>
+</html>

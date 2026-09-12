@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>บันทึกการใช้อุปกรณ์ — ศัลยกรรมกระดูก</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Noto Sans Thai", "Sarabun", system-ui, sans-serif; background: #f2f4f8; color: #1e293b; padding: 20px; }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  header { background: #0f766e; color: #fff; padding: 16px 20px; border-radius: 12px 12px 0 0; }
+  header h1 { font-size: 18px; }
+  header p { font-size: 13px; opacity: .85; margin-top: 4px; }
+  nav.pagenav { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  nav.pagenav a {
+    font-size: 12px; color: #fff; text-decoration: none;
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35);
+    padding: 5px 11px; border-radius: 999px; font-weight: 600;
+  }
+  nav.pagenav a:hover { background: rgba(255,255,255,.25); }
+  nav.pagenav a.current { background: #fff; color: #0f766e; border-color: #fff; }
+  .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 0 0 12px 12px; padding: 20px; }
+  .section { margin-bottom: 18px; }
+  .section h2 { font-size: 14px; color: #0f766e; border-bottom: 2px solid #ccfbf1; padding-bottom: 6px; margin-bottom: 12px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; color: #334155; }
+  input, select, textarea { width: 100%; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #fff; }
+  input:focus, select:focus { outline: 2px solid #14b8a6; border-color: #14b8a6; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .ro { background: #f8fafc; }
+  .readonly { background: #f1f5f9; color: #475569; }
+  .price { font-size: 16px; font-weight: 700; }
+  .price.claim { color: #0f766e; }
+  .price.cost { color: #b45309; }
+  .totalbar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .tot { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: center; }
+  .tot .lbl { font-size: 12px; color: #64748b; }
+  .tot .val { font-size: 18px; font-weight: 700; margin-top: 4px; }
+  .tot.claim { border-color: #99f6e4; background: #f0fdfa; }
+  .tot.cost { border-color: #fed7aa; background: #fff7ed; }
+  .tot.var { border-color: #ddd6fe; background: #f5f3ff; }
+  .warn { background: #fef9c3; border: 1px solid #facc15; color: #854d0e; padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-top: 10px; display: none; }
+  .btn { display: inline-block; background: #0f766e; color: #fff; border: none; border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 12px; }
+  .btn.secondary { background: #fff; color: #0f766e; border: 1.5px solid #0f766e; }
+  .btn:hover { opacity: .9; }
+  .item { border: 1px dashed #cbd5e1; border-radius: 10px; padding: 12px; margin-bottom: 12px; position: relative; background: #fcfdfd; }
+  .item .del { position: absolute; top: 8px; right: 10px; background: #fee2e2; color: #b91c1c; border: none; border-radius: 6px; padding: 3px 9px; font-size: 12px; cursor: pointer; }
+  .flag { display: inline-block; font-size: 11px; background: #fef9c3; color: #854d0e; border-radius: 5px; padding: 2px 6px; margin-left: 6px; }
+  .vendor-hint { font-size: 11.5px; color: #6b7280; margin-top: 3px; }
+  footer { margin-top: 16px; text-align: center; font-size: 12px; color: #94a3b8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>📋 บันทึกการใช้อุปกรณ์ — ศัลยกรรมกระดูก</h1>
+    <p>รวมรายการอุปกรณ์ทั้งหมดจากหน้าจับคู่รหัสสิทธิ์ (26 รายการ) · demo — ยังไม่เชื่อมฐานข้อมูลจริง</p>
+    <nav class="pagenav">
+      <a href="lockingscrew35_usage_form.html" class="current">📋 บันทึกการใช้อุปกรณ์</a>
+      <a href="device_mapping.html">🔗 จับคู่-รหัสเบิก</a>
+      <a href="edit_claim_code.html">🛠️ แก้ไขรหัสเบิก</a>
+    </nav>
+  </header>
+
+  <div class="card">
+    <!-- เคส (กรอกครั้งเดียว) -->
+    <div class="section">
+      <h2>1 · ข้อมูลเคส</h2>
+      <label>HN / ชื่อผู้ป่วย</label>
+      <input id="hn" placeholder="เช่น 12345 / นายสมชาย">
+      <div class="row2">
+        <div><label>วันที่ผ่าตัด</label><input type="date" id="sdate"></div>
+        <div><label>ห้องผ่าตัด</label>
+          <select id="room"><option>OR-1</option><option>OR-2</option><option>OR-3</option><option>OR-4</option></select>
+        </div>
+      </div>
+      <label>แพทย์ผู้ผ่าตัด</label>
+      <select id="doc"><option>นพ. ศัลยกรรมกระดูก 1</option><option>นพ. ศัลยกรรมกระดูก 2</option><option>พญ. ศัลยกรรมกระดูก</option></select>
+      <label>สิทธิการรักษา <span class="flag">เลือกแล้วเด้งราคา</span></label>
+      <select id="right" onchange="calc()">
+        <option value="OFC">ข้าราชการ (OFC)</option>
+        <option value="UCS">สิทธิ UC / บัตรทอง (UCS)</option>
+        <option value="LGO">อปท. (LGO)</option>
+        <option value="NHS">เจ้าหน้าที่ สปสช. (NHS)</option>
+        <option value="PVT">ชำระเอง/เอกชน (PVT)</option>
+      </select>
+    </div>
+
+    <!-- รายการอุปกรณ์ -->
+    <div class="section">
+      <h2>2 · รายการอุปกรณ์ที่ใช้</h2>
+      <div id="items"></div>
+      <button class="btn secondary" onclick="addItem()">＋ เพิ่มรายการอีกขนาด/ชนิด</button>
+    </div>
+
+    <div class="warn" id="nowarn">⚠️ สิทธิที่เลือกยังไม่มีราคาเบิกสำหรับอุปกรณ์บางรายการ (เช่น Cerclage wire สิทธิ UCS) — ระบบจะบันทึกได้ในกรณีฉุกเฉิน แต่ flag ส่งให้การเงินตรวจสอบ และไม่พิมพ์ใบเบิกสำหรับรายการนั้น</div>
+
+    <!-- ยอดรวม -->
+    <div class="section">
+      <h2>3 · ยอดรวม</h2>
+      <div class="totalbar">
+        <div class="tot claim"><div class="lbl">ยอดเบิกได้ (สิทธิ)</div><div class="val" id="tClaim">0</div></div>
+        <div class="tot cost"><div class="lbl">ต้นทุนรวม</div><div class="val" id="tCost">0</div></div>
+        <div class="tot var"><div class="lbl">ส่วนต่าง</div><div class="val" id="tVar">0</div></div>
+      </div>
+    </div>
+
+    <button class="btn" style="width:100%" onclick="submitForm()">✅ ยืนยันบันทึก</button>
+    <footer>ผู้บันทึก: พยาบาล OR (จากระบบ login) · สถานะ record: รอคลัง/การเงินตรวจสอบ</footer>
+  </div>
+</div>
+
+<script>
+  // ---- ข้อมูลจากหน้า device_mapping.html (devices + RIGHTS) ----
+  // K-wire ทุกขนาด รหัสสิทธิ์ 7313
+  const kwireDias = [0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.5, 3.0];
+  const kwireLens = [150, 300];
+  let kid = 100;
+  const kwireRows = [];
+  kwireLens.forEach(len => kwireDias.forEach(dia => {
+    kwireRows.push({ id: kid++, category: 'kwire', itemName: `K-wire ${dia}×${len}mm`, vendor: 'รพ.', code: '7313', variant: '' });
+  }));
+
+  const DEVICES = [
+    { id: 1, category: 'screw-locking', itemName: 'Self Tapping Locking screw 3.5×30mm', vendor: 'Emerson', code: '7301', variant: '' },
+    { id: 2, category: 'screw-locking', itemName: 'Self Tapping Locking screw 3.5×50mm', vendor: 'Emerson', code: '7301', variant: '' },
+    { id: 3, category: 'screw-cortex', itemName: 'Cortex screw 3.5×24mm', vendor: 'รพ.', code: '7302', variant: '' },
+    { id: 4, category: 'screw-cortex', itemName: 'Cortex screw 4.5×40mm', vendor: 'รพ.', code: '7302', variant: '' },
+    ...kwireRows,
+    { id: 7, category: 'cannulated', itemName: 'Cannulated Locking screw 6.5×60mm', vendor: 'Emerson', code: '7315', variant: '' },
+    { id: 8, category: 'wire', itemName: 'Cerclage wire 18 gauge', vendor: 'Emerson', code: '7312', variant: '' },
+    { id: 9, category: 'plate', itemName: 'Small DCP Plate 4H L', vendor: 'รพ.', code: '7214', variant: 'A' },
+    { id: 10, category: 'plate', itemName: 'Distal Radius Locking Plate 2H L (VA)', vendor: 'Rockwood', code: '7214', variant: 'B' }
+  ];
+
+  const CATEGORY_ORDER = ['screw-cortex', 'screw-locking', 'cannulated', 'kwire', 'plate', 'wire'];
+  const CATEGORIES = {
+    'screw-cortex':  { label: 'Cortex screws',      icon: '🔩' },
+    'screw-locking': { label: 'Locking screws',     icon: '🔩' },
+    'cannulated':    { label: 'Cannulated screws',  icon: '🔩' },
+    'kwire':         { label: 'K-wire',             icon: '📌' },
+    'plate':         { label: 'เพลท',               icon: '🛡️' },
+    'wire':          { label: 'ลวด',                icon: '🧵' }
+  };
+
+  // ราคา 5 สิทธิ์ต่อรหัส — เฉพาะรหัสที่ใช้จริงในรายการอุปกรณ์ข้างต้น (จาก RIGHTS ในหน้า device_mapping.html)
+  const RIGHTS = {
+    '7301': { name: 'สกรูยึดแผ่นโลหะชนิดหัวล็อก (Lock screw)', short: 'Lock screw', unit: 'ตัว',
+      prices: { UCS: 1600, OFC: 2400, LGO: 2400, NHS: 2400, PVT: 2400 } },
+    '7302': { name: 'สกรูยึดแผ่นโลหะดามกระดูก (Cortex screw)', short: 'Cortex screw', unit: 'ตัว',
+      prices: { UCS: 270, OFC: 300, LGO: 300, NHS: 300, PVT: 300 } },
+    '7313': { name: 'K-wire', short: 'K-wire', unit: 'เส้น',
+      prices: { UCS: 200, OFC: 300, LGO: 300, NHS: 300, PVT: 300 } },
+    '7315': { name: 'สกรูยึดกระดูกชนิดมีรูสอดแกนนำทาง (Cannulated screw)', short: 'Cannulated screw', unit: 'ตัว',
+      prices: { UCS: 2000, OFC: 3000, LGO: 3000, NHS: 3000, PVT: 3000 } },
+    '7312': { name: 'ลวด (Cerclage wire)', short: 'Cerclage wire', unit: 'เส้น',
+      prices: { UCS: null, OFC: 1500, LGO: 1500, NHS: 1500, PVT: 1500 } },
+    '7214': {
+      name: 'แผ่นโลหะดามกระดูก ชนิดหัวล็อก (Locking compression plate)', short: 'Locking plate', unit: 'ชิ้น',
+      variants: {
+        A: { label: 'A — Locking compression plate', prices: { UCS: 10000, OFC: 10000, LGO: 10000, NHS: 10000, PVT: 10000 } },
+        B: { label: 'B — ชนิดหัวล็อกสำหรับใส่ข้อ (Distal radius)', prices: { UCS: 17000, OFC: 17000, LGO: 17000, NHS: 17000, PVT: 17000 } }
+      }
+    }
+  };
+
+  function fmt(n){ return n.toLocaleString('th-TH'); }
+
+  function findDevice(id){ return DEVICES.find(d => d.id === Number(id)); }
+
+  function rightsInfo(device){
+    const r = RIGHTS[device.code];
+    if (!r) return null;
+    if (r.variants) {
+      const v = r.variants[device.variant];
+      return v ? { short: r.short, unit: r.unit, prices: v.prices } : null;
+    }
+    return { short: r.short, unit: r.unit, prices: r.prices };
+  }
+
+  function getPrice(device, right){
+    const info = rightsInfo(device);
+    if (!info) return null;
+    const p = info.prices[right];
+    return (p === null || p === undefined) ? null : p;
+  }
+
+  function codeLabel(device){
+    return device.code + (device.variant ? device.variant : '');
+  }
+
+  function deviceOptionsHTML(selectedId){
+    let html = '';
+    CATEGORY_ORDER.forEach(catKey => {
+      const items = DEVICES.filter(d => d.category === catKey);
+      if (!items.length) return;
+      const cat = CATEGORIES[catKey];
+      html += `<optgroup label="${cat.icon} ${cat.label}">`;
+      html += items.map(d =>
+        `<option value="${d.id}" ${d.id === Number(selectedId) ? 'selected' : ''}>${d.itemName}</option>`
+      ).join('');
+      html += '</optgroup>';
+    });
+    return html;
+  }
+
+  function updateItemInfo(it){
+    const device = findDevice(it.querySelector('.dev').value);
+    it.querySelector('.vendorhint').textContent = `บริษัท/แหล่ง: ${device.vendor}`;
+    it.querySelector('.code').value = codeLabel(device);
+    it.querySelector('.unitlabel').textContent = rightsInfo(device) ? rightsInfo(device).unit : '-';
+  }
+
+  function onDeviceChange(sel){
+    const it = sel.closest('.item');
+    updateItemInfo(it);
+    calc();
+  }
+
+  function addItem(deviceId){
+    deviceId = deviceId || DEVICES[0].id;
+    const box = document.getElementById('items');
+    const d = document.createElement('div');
+    d.className = 'item';
+    d.innerHTML = `
+      <button class="del" onclick="this.closest('.item').remove(); calc();">✕</button>
+      <label>ชนิดอุปกรณ์</label>
+      <select class="dev" onchange="onDeviceChange(this)">
+        ${deviceOptionsHTML(deviceId)}
+      </select>
+      <div class="vendor-hint vendorhint"></div>
+      <div class="row2">
+        <div>
+          <label>จำนวน (<span class="unitlabel"></span>)</label>
+          <input type="number" class="qty" value="1" min="1" onchange="calc()">
+        </div>
+        <div>
+          <label>รหัสสิทธิ์เบิก</label>
+          <input class="ro readonly code" readonly>
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label>ราคาเบิกได้/หน่วย (บาท)</label>
+          <input class="ro readonly price claim claimpx" readonly>
+        </div>
+        <div>
+          <label>ยอดรายการนี้ (เบิก)</label>
+          <input class="ro readonly lineclaim" readonly>
+        </div>
+      </div>
+      <div>
+        <label>ต้นทุนจริง/หน่วย (บาท) — ใส่ทีหลังได้</label>
+        <input type="number" class="costpx" placeholder="ว่าง — consignment ยังไม่ตีราคา" min="0" onchange="calc()">
+      </div>`;
+    box.appendChild(d);
+    updateItemInfo(d);
+    calc();
+  }
+
+  function calc(){
+    const right = document.getElementById('right').value;
+    let tClaim = 0, tCost = 0, anyWarn = false;
+    document.querySelectorAll('.item').forEach(it => {
+      const device = findDevice(it.querySelector('.dev').value);
+      const qty = +(it.querySelector('.qty').value || 0);
+      const cp = it.querySelector('.claimpx');
+      const line = it.querySelector('.lineclaim');
+      const cost = +(it.querySelector('.costpx').value || 0);
+      const p = getPrice(device, right);
+      if (p === null) {
+        cp.value = '⚠️ ไม่มีราคา'; cp.style.color = '#b45309';
+        line.value = '—'; anyWarn = true;
+      } else {
+        cp.value = fmt(p); cp.style.color = '';
+        line.value = fmt(p * qty); tClaim += p * qty;
+      }
+      if (cost > 0) tCost += cost * qty;
+    });
+    document.getElementById('tClaim').textContent = fmt(tClaim);
+    document.getElementById('tCost').textContent = fmt(tCost);
+    const v = document.getElementById('tVar');
+    v.textContent = (tCost ? (tClaim - tCost >= 0 ? '+' : '') + fmt(tClaim - tCost) : 'รอต้นทุน');
+    v.style.color = (tCost && tClaim < tCost) ? '#b91c1c' : '';
+    document.getElementById('nowarn').style.display = anyWarn ? 'block' : 'none';
+  }
+
+  function submitForm(){
+    const hn = document.getElementById('hn').value.trim();
+    if(!hn){ alert('กรุณากรอก HN / ชื่อผู้ป่วย'); return; }
+    const items = document.querySelectorAll('.item');
+    if(!items.length){ alert('ยังไม่มีรายการอุปกรณ์'); return; }
+    const right = document.getElementById('right').value;
+    const anyBlocked = [...items].some(it => getPrice(findDevice(it.querySelector('.dev').value), right) === null);
+    const rows = [...items].map(it => {
+      const device = findDevice(it.querySelector('.dev').value);
+      const q = it.querySelector('.qty').value;
+      const cost = it.querySelector('.costpx').value || '(ว่าง)';
+      const p = getPrice(device, right);
+      const info = rightsInfo(device);
+      return `  • ${codeLabel(device)} ${device.itemName} (${device.vendor}) — ${q} ${info ? info.unit : ''} — เบิก ${p != null ? fmt(p*q) : '⚠️ไม่มีราคา'} — ต้นทุน ${cost}`;
+    });
+    alert(`✅ บันทึกแล้ว (demo)\nHN: ${hn}\nสิทธิ: ${right}\n${rows.join('\n')}\n\nยอดเบิก: ${fmt(+document.getElementById('tClaim').textContent.replace(/,/g,''))} บาท` +
+      (anyBlocked ? `\n\n⚠️ มีรายการที่ไม่มีราคาเบิกในสิทธินี้ — ระบบ flag ส่งการเงินตรวจสอบ ไม่พิมพ์ใบเบิกรายการนั้น` : '') +
+      `\n(ในระบบจริง: snapshot ราคา + flag ส่งคลัง/การเงิน)`);
+  }
+
+  // init
+  document.getElementById('sdate').value = new Date().toISOString().slice(0,10);
+  addItem(1);
+  document.querySelector('.item .qty').value = 2;
+  calc();
+</script>
+</body>
+</html>

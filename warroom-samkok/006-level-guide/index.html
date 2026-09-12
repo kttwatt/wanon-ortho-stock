@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>สามก๊ก Warroom — ตำราอัปเลเวล</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@600;800;900&family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Noto Sans Thai", sans-serif; background: #0b0a08; color: #e8dfd0; padding: 16px 20px; }
+  header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid #2a2118; border-radius: 12px; background: linear-gradient(90deg,#14100c,#1c1410 60%,#14100c); margin-bottom: 14px; }
+  .title { font-family: "Noto Serif Thai", serif; font-weight: 900; font-size: 19px; letter-spacing: 1px; }
+  .title span { color: #d4af37; }
+  .sub { font-size: 11px; color: #8d8270; font-weight: 600; margin-top: 2px; }
+  .tabs { display: flex; gap: 8px; margin-left: auto; }
+  .tab { padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 12.5px; border: 1px solid #3a2f22; color: #cbbfa8; background: #191410; }
+  .tab.active { background: linear-gradient(145deg,#8f1520,#6d0e17); color: #ffe9a8; border-color: #d4af37; }
+  /* resources legend */
+  .resbar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .res { background: #121009; border: 1px solid #2a2118; border-radius: 10px; padding: 8px 14px; font-size: 12px; font-weight: 800; }
+  .res span { display: block; font-size: 10px; color: #8d8270; font-weight: 600; }
+  /* level path */
+  .levels { display: flex; flex-direction: column; gap: 8px; }
+  .lvl { display: grid; grid-template-columns: 86px 1.25fr 1fr; gap: 12px; align-items: center;
+    background: #121009; border: 1px solid #2a2118; border-radius: 12px; padding: 10px 14px; }
+  .lvl .badge { width: 64px; height: 64px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: linear-gradient(160deg,#1f1a13,#14110d); border: 1.5px solid #3a3020; font-family: "Noto Serif Thai", serif; font-weight: 900; }
+  .lvl .badge .n { font-size: 11px; color: #d4af37; letter-spacing: 1px; }
+  .lvl .badge .t { font-size: 9px; color: #8d8270; margin-top: 2px; text-align: center; line-height: 1.2; }
+  .lvl .name { font-family: "Noto Serif Thai", serif; font-weight: 900; font-size: 14px; margin-bottom: 5px; }
+  .lvl .crit { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip { font-size: 10.5px; font-weight: 800; background: #1a150f; border: 1px solid #33291d; color: #cbbfa8; padding: 2px 8px; border-radius: 12px; }
+  .chip.gold { border-color: #4a3d22; color: #e8c76a; } .chip.force { border-color: #4a2222; color: #e89c9c; } .chip.grain { border-color: #2f4a2f; color: #8fd19a; } .chip.scroll { border-color: #2a3a4a; color: #9cc3e8; }
+  .lvl .unlock { font-size: 11px; color: #8d8270; }
+  .lvl .unlock b { color: #e8dfd0; }
+  .lvl.now { border-color: #d4af37; box-shadow: 0 0 16px rgba(212,175,55,.15); }
+  .lvl.now .badge { border-color: #d4af37; }
+  .lvl.next { border: 1.5px dashed #d4af37; opacity: 1; }
+  .lvl.next .badge { border-color: #4a3d22; }
+  .lvl.future { opacity: .55; }
+  .lvl.done { opacity: .85; }
+  .lvl.done .badge { border-color: #3f5a3f; }
+  .lvl.done .badge .n { color: #7ecb7e; }
+  .prog { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
+  .prog .bar { flex: 1; height: 10px; background: #26201a; border-radius: 5px; overflow: hidden; border: 1px solid #3a2f22; }
+  .prog .bar i { display: block; height: 100%; width: 62%; background: linear-gradient(90deg,#c41e3a,#d4af37); }
+  .prog .lbl { font-size: 12px; font-weight: 800; color: #d4af37; white-space: nowrap; }
+  /* buildings */
+  .sec-title { font-family: "Noto Serif Thai", serif; font-weight: 900; color: #d4af37; font-size: 14px; margin: 18px 0 10px; }
+  .bgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .bld { background: #121009; border: 1px solid #2a2118; border-radius: 12px; padding: 11px 13px; }
+  .bld .ic { font-size: 22px; }
+  .bld .nm { font-family: "Noto Serif Thai", serif; font-weight: 900; font-size: 12.5px; margin-top: 5px; }
+  .bld .fx { font-size: 10.5px; color: #8d8270; margin-top: 3px; line-height: 1.4; }
+  .bld table { width: 100%; margin-top: 7px; border-collapse: collapse; font-size: 10.5px; }
+  .bld td { padding: 2.5px 0; color: #8d8270; }
+  .bld td:last-child { text-align: right; color: #e8dfd0; font-weight: 700; }
+  .note { font-size: 11px; color: #6f6657; margin-top: 14px; line-height: 1.6; border: 1px dashed #2a2118; border-radius: 10px; padding: 10px 14px; }
+  .note b { color: #d4af37; }
+</style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:20px;">🏮</span>
+  <div>
+    <div class="title">WARROOM สามก๊ก — <span>ตำราอัปเลเวล</span></div>
+    <div class="sub">เกณฑ์การเติบโตของเมืองลกเอี๊ยง — ทุกตัวเลขมาจากการใช้จริง</div>
+  </div>
+  <div class="tabs">
+    <div class="tab">🏙️ ผังเมือง</div>
+    <div class="tab active">📜 ตำราเลเวล</div>
+  </div>
+</header>
+
+<div class="resbar">
+  <div class="res"><span>🪙 ทอง — tokens ที่ใช้จริง</span>ค่าบริการโมเดลรวม</div>
+  <div class="res"><span>⚔️ พลังศึก — หมายศึกที่สำเร็จ</span>นับจาก kanban done</div>
+  <div class="res"><span>🌾 เสบียง — ชั่วโมง automation</span>cron/งานอัตโนมัติ</div>
+  <div class="res"><span>📜 คัมภีร์ — skills ที่บันทึก</span>ความรู้ที่สะสม</div>
+</div>
+
+<div class="prog">
+  <div class="bar"><i></i></div>
+  <div class="lbl">ปราสาท Lv.3 · 62% → Lv.4</div>
+</div>
+
+<div class="levels">
+
+  <div class="lvl done">
+    <div class="badge"><div class="n">Lv.1</div><div class="t">เริ่มก่อตั้ง</div></div>
+    <div><div class="name">ตั้งค่าย</div>
+      <div class="crit"><span class="chip">สร้าง board</span><span class="chip force">⚔️ งานเสร็จ 1</span></div>
+    </div>
+    <div class="unlock">เริ่ม: <b>board 1 + ขงเบ้ง</b> (ขุนพล 1)</div>
+  </div>
+
+  <div class="lvl done">
+    <div class="badge"><div class="n">Lv.2</div><div class="t">ตั้งรากฐาน</div></div>
+    <div><div class="name">เมืองตั้งตัว</div>
+      <div class="crit"><span class="chip force">⚔️ งานเสร็จ 10</span><span class="chip gold">🪙 ใช้ 1k</span></div>
+    </div>
+    <div class="unlock">ปลดล็อก: <b>จูล่ง</b> (ขุนพล 2) · แผนกแรก · review แบบ manual</div>
+  </div>
+
+  <div class="lvl now">
+    <div class="badge"><div class="n">Lv.3</div><div class="t">เมืองเฟื่องฟู</div></div>
+    <div><div class="name">สามฝ่ายตั้งครบ</div>
+      <div class="crit"><span class="chip force">⚔️ งานเสร็จ 30</span><span class="chip gold">🪙 ใช้ 5k</span><span class="chip">3 ฝ่ายมีงาน</span></div>
+    </div>
+    <div class="unlock">ปลดล็อก: <b>สุมาอี้</b> · review lane อัตโนมัติ · ฝ่ายทั้ง 3 ครบ</div>
+  </div>
+
+  <div class="lvl next">
+    <div class="badge"><div class="n">Lv.4</div><div class="t">เมืองมั่นคง</div></div>
+    <div><div class="name">ขยายทัพ</div>
+      <div class="crit"><span class="chip force">⚔️ งานเสร็จ 60</span><span class="chip grain">🌾 20 ชม. cron</span><span class="chip">ขุนพล 4 ตัว</span><span class="chip" style="border-color:#d4af37;color:#ffe9a8;">▶ เป้าหมายถัดไป</span></div>
+    </div>
+    <div class="unlock">ปลดล็อก: <b>ขุนพล 5-6</b> (เตียวหุย/ฮองทอง) · หอสอดแนมอัตโนมัติ</div>
+  </div>
+
+  <div class="lvl future">
+    <div class="badge"><div class="n">Lv.5</div><div class="t">นครหลวง</div></div>
+    <div><div class="name">ราชสำนักสมบูรณ์</div>
+      <div class="crit"><span class="chip force">⚔️ งานเสร็จ 100</span><span class="chip scroll">📜 คัมภีร์ 10</span><span class="chip">ทุกแผนกมีงาน</span></div>
+    </div>
+    <div class="unlock">ปลดล็อก: <b>ขุนพล 8 ครบ</b> · 36 กลยุทธ์ · จอ warroom จอใหญ่</div>
+  </div>
+
+  <div class="lvl future">
+    <div class="badge"><div class="n">Lv.6</div><div class="t">เมืองยุทธศาสตร์</div></div>
+    <div><div class="name">แผ่อำนาจ</div>
+      <div class="crit"><span class="chip force">⚔️ งานเสร็จ 150</span><span class="chip grain">🌾 50 ชม.</span><span class="chip">review 30 ครั้ง</span></div>
+    </div>
+    <div class="unlock">ปลดล็อก: <b>แผนก Lv.4</b> · การ์ดกลยุทธ์พิเศษ</div>
+  </div>
+
+  <div class="lvl future">
+    <div class="badge"><div class="n">Lv.7</div><div class="t">เมืองเกรียงไกร</div></div>
+    <div><div class="name">ชื่อเสียงเลื่องลือ</div>
+      <div class="crit"><span class="chip force">⚔️ งานเสร็จ 220</span><span class="chip gold">🪙 ใช้ 50k</span></div>
+    </div>
+    <div class="unlock">ปลดล็อก: <b>multi-board</b> (สร้างเมืองรองได้)</div>
+  </div>
+
+  <div class="lvl future">
+    <div class="badge"><div class="n">Lv.8</div><div class="t">เมืองมั่งคั่ง</div></div>
+    <div><div class="name">ทุกแผนกเต็มกำลัง</div>
+      <div class="crit"><span class="chip force">⚔️ งานเสร็จ 300</span><span class="chip">ทุกแผนก Lv.3</span></div>
+    </div>
+    <div class="unlock">ปลดล็อก: <b>ขุนพล 10</b> · กลยุทธ์ครึ่งตำรา</div>
+  </div>
+
+  <div class="lvl future">
+    <div class="badge"><div class="n">Lv.9</div><div class="t">เมืองไร้เทียมทาน</div></div>
+    <div><div class="name">ทัพสมบูรณ์</div>
+      <div class="crit"><span class="chip force">⚔️ งานเสร็จ 400</span><span class="chip">review 100 ครั้ง</span></div>
+    </div>
+    <div class="unlock">ปลดล็อก: <b>kanban swarm</b> (แตกงานคู่ขนานอัตโนมัติ)</div>
+  </div>
+
+  <div class="lvl future">
+    <div class="badge"><div class="n">Lv.10</div><div class="t">ราชวงศ์</div></div>
+    <div><div class="name">จักรพรรดิ์วอร์รูม</div>
+      <div class="crit"><span class="chip force">⚔️ งานเสร็จ 500</span><span class="chip scroll">📜 คัมภีร์ 20</span><span class="chip">ครองทุกแผนก Lv.5</span></div>
+    </div>
+    <div class="unlock">🏆 <b>ราชวงศ์สมบูรณ์</b> — ปลดล็อกทุกอย่าง + เกียรติยศถาวร</div>
+  </div>
+
+</div>
+
+<div class="sec-title">🏗️ เลเวลแผนก (แต่ละอาคารอัปตามงานในแผนกของตัวเอง)</div>
+<div class="bgrid">
+  <div class="bld">
+    <div class="ic">⚔️</div><div class="nm">ศาลาเทรด</div>
+    <div class="fx">งานเทรดที่สำเร็จ</div>
+    <table><tr><td>Lv.2</td><td>10 งาน</td></tr><tr><td>Lv.3</td><td>30 งาน</td></tr><tr><td>Lv.4</td><td>60 งาน + ขุนพลประจำ</td></tr><tr><td>Lv.5</td><td>100 งาน + cron</td></tr></table>
+  </div>
+  <div class="bld">
+    <div class="ic">🐉</div><div class="nm">ศาลาสร้างสรรค์</div>
+    <div class="fx">งานคอนเทนต์/โค้ดที่เสร็จ</div>
+    <table><tr><td>Lv.2</td><td>10 งาน</td></tr><tr><td>Lv.3</td><td>30 งาน</td></tr><tr><td>Lv.4</td><td>60 งาน + ขุนพลประจำ</td></tr><tr><td>Lv.5</td><td>100 งาน + cron</td></tr></table>
+  </div>
+  <div class="bld">
+    <div class="ic">🏯</div><div class="nm">ศาลาเสบียง</div>
+    <div class="fx">งานเอกสาร/ops ที่เสร็จ</div>
+    <table><tr><td>Lv.2</td><td>10 งาน</td></tr><tr><td>Lv.3</td><td>30 งาน</td></tr><tr><td>Lv.4</td><td>60 งาน + ขุนพลประจำ</td></tr><tr><td>Lv.5</td><td>100 งาน + cron</td></tr></table>
+  </div>
+  <div class="bld">
+    <div class="ic">🔭</div><div class="nm">หอสอดแนม</div>
+    <div class="fx">การแจ้งเตือนที่ส่งสำเร็จ</div>
+    <table><tr><td>Lv.2</td><td>20 แจ้งเตือน</td></tr><tr><td>Lv.3</td><td>60 แจ้งเตือน</td></tr><tr><td>Lv.4</td><td>150 แจ้งเตือน</td></tr><tr><td>Lv.5</td><td>300 แจ้งเตือน</td></tr></table>
+  </div>
+</div>
+
+<div class="note">
+  <b>กติกา:</b> นับเฉพาะงานที่ assign ให้ขุนพลจริง (มี assignee) และไม่นับงานที่ติด tag demo/test ·
+  งานที่เสร็จก่อนอัปเกรดนับสะสมต่อ ไม่รีเซ็ต · ระบบคำนวณอัตโนมัติจาก kanban.db + usage logs — ไม่ต้องกรอกมือ ·
+  อัปเกรดปราสาท = ครบทุกเกณฑ์พร้อมกัน, อัปเกรดแผนก = ครบเกณฑ์แผนกนั้นอย่างเดียว
+</div>
+
+</body>
+</html>

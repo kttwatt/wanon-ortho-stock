@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>รับเข้า Stock — แผนผังโครง (ยังไม่ใช้งาน)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Noto Sans Thai", "Sarabun", system-ui, sans-serif; background: #f2f4f8; color: #1e293b; padding: 20px; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  header { background: #155e75; color: #fff; padding: 14px 18px; border-radius: 12px 12px 0 0; font-size: 16px; font-weight: 600; }
+  nav { background: #e0f2fe; border-bottom: 2px solid #7dd3fc; padding: 8px 18px; font-size: 13px; }
+  nav a { color: #075985; text-decoration: none; margin-right: 14px; font-weight: 500; }
+  nav a.active { color: #0369a1; border-bottom: 2px solid #0369a1; }
+  .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 0 0 12px 12px; padding: 22px; }
+  .tag { display: inline-block; background: #fef9c3; color: #854d0e; border: 1px solid #facc15; font-size: 12px; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px; }
+  h2 { font-size: 15px; color: #0e7490; margin: 18px 0 8px; }
+  .field { margin: 10px 0; }
+  .field label { display: block; font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 3px; }
+  .field input, .field select { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; background: #fbfdff; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .skel { border: 1px dashed #94a3b8; border-radius: 8px; padding: 10px 14px; color: #64748b; font-size: 12px; background: #f8fafc; margin: 8px 0; }
+  footer { margin: 16px 0; text-align: center; font-size: 12px; color: #94a3b8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>📥 รับเข้า Stock (Stock In)</header>
+  <nav>
+    <a href="lockingscrew35_usage_form.html">🏥 บันทึกการใช้</a>
+    <a class="active" href="stock_in.html">📥 รับเข้า Stock</a>
+    <a href="stock_out.html">📤 ตัดจ่ายสต็อก</a>
+  </nav>
+  <div class="card">
+    <span class="tag">⏸️ โครงหน้าเท่านั้น — ยังไม่ทำอะไร วางไว้ก่อน</span>
+
+    <h2>ขั้นที่ 1 · ข้อมูลใบรับของ (PO / ใบส่งของ)</h2>
+    <div class="row2">
+      <div class="field"><label>เลขที่ PO / ใบส่งของ</label><input placeholder="เช่น PO-169101417"></div>
+      <div class="field"><label>วันที่รับของ</label><input type="date"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>บริษัท / Vendor</label><select><option>— เลือก vendor —</option></select></div>
+      <div class="field"><label>ประเภท</label><select><option>ซื้อขาด</option><option>ยืม / Consignment</option></select></div>
+    </div>
+
+    <h2>ขั้นที่ 2 · รายการที่รับ (SKU × Lot × จำนวน)</h2>
+    <div class="skel">[ตารางรายการ: เลือก SKU (family-aware) → Lot/Batch → จำนวนรับจริง → ราคาซื้อครั้งนี้ → วันหมดอายุ sterile]</div>
+    <div style="font-size:12px;color:#64748b">+ ปุ่ม "＋ เพิ่มรายการ" · ตรวจรับหน้างาน (นับจริง เทียบ PO, lot/exp, พิมพ์ label QR)</div>
+
+    <h2>ขั้นที่ 3 · ยืนยันรับเข้า</h2>
+    <div class="skel">[ปุ่ม ✅ ยืนยันรับเข้า → บันทึก fact_stock_in → dim_lot +qty → สถานะ Active]</div>
+
+    <footer>โครงเพจสำหรับวางงานหน้า ยังไม่ต่อฐานข้อมูล</footer>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แก้ไขรหัสเบิก | รพ.วานรนิวาส</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #f2f4f8;
+    font-family: 'Noto Sans Thai', 'Sarabun', sans-serif;
+    color: #1f2937;
+  }
+  .container { max-width: 1000px; margin: 0 auto; padding: 16px 16px 60px; }
+  header { margin-bottom: 16px; }
+  header h1 { color: #0f766e; font-size: 20px; margin: 0 0 4px; }
+  header p { margin: 0; font-size: 13px; color: #6b7280; }
+  nav.pagenav { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  nav.pagenav a {
+    font-size: 12.5px; color: #0f766e; text-decoration: none;
+    background: #fff; border: 1px solid #ccfbf1; padding: 6px 12px;
+    border-radius: 999px; font-weight: 600;
+  }
+  nav.pagenav a:hover { background: #f0fdfa; }
+  nav.pagenav a.current { background: #0f766e; color: #fff; border-color: #0f766e; }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .card-head h2 { font-size: 15px; margin: 0; color: #111827; }
+  button { font-family: inherit; }
+  button.primary {
+    background: #0f766e; color: #fff; border: none;
+    padding: 9px 16px; border-radius: 8px; cursor: pointer; font-size: 14px;
+  }
+  button.primary:hover { background: #0d5f58; }
+  button.secondary {
+    background: #e5e7eb; color: #1f2937; border: none;
+    padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;
+  }
+  button.secondary:hover { background: #d1d5db; }
+  button.danger {
+    background: #fee2e2; color: #b91c1c; border: none;
+    padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; margin-left: 4px;
+  }
+  button.danger:hover { background: #fecaca; }
+  .table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid #e5e7eb; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  col.col-code { width: 8%; }
+  col.col-name { width: 24%; }
+  col.col-short { width: 14%; }
+  col.col-unit { width: 7%; }
+  col.col-price { width: 8%; }
+  col.col-actions { width: 13%; }
+  thead th {
+    background: #0f766e; color: #fff; padding: 10px 6px; text-align: left;
+    font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  thead th.price-th { text-align: center; }
+  tbody td { padding: 8px 6px; border-bottom: 1px solid #e5e7eb; vertical-align: top; overflow: hidden; }
+  tbody td.price-td { text-align: center; font-weight: 700; color: #111827; }
+  tbody tr:hover { background: #f8fafc; }
+  .code-cell { font-weight: 700; color: #0f766e; }
+  .name-cell { color: #111827; }
+  .muted { color: #9ca3af; font-weight: 400; }
+  .empty-row td { text-align: center; padding: 24px; color: #9ca3af; }
+
+  /* --- ฟอร์มเพิ่ม/แก้ไข --- */
+  .form-overlay {
+    display: none;
+    position: fixed; inset: 0; background: rgba(15,23,42,.45);
+    align-items: center; justify-content: center; padding: 16px; z-index: 20;
+  }
+  .form-overlay.open { display: flex; }
+  .form-card {
+    background: #fff; border-radius: 12px; padding: 20px;
+    width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  }
+  .form-card h3 { font-size: 16px; color: #0f766e; margin: 0 0 14px; }
+  .form-field { margin-bottom: 12px; }
+  .form-field label { display: block; font-size: 12.5px; font-weight: 600; color: #374151; margin-bottom: 4px; }
+  .form-field input {
+    width: 100%; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px;
+    font-size: 13.5px; font-family: inherit; background: #fff;
+  }
+  .form-field input:focus { outline: 2px solid #14b8a6; border-color: #14b8a6; }
+  .form-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .price-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .price-grid .form-field label { text-align: center; color: #0f766e; font-size: 11px; text-transform: uppercase; }
+  .price-grid input { text-align: center; }
+  .form-error { color: #b91c1c; font-size: 12.5px; margin: 8px 0; display: none; }
+  .form-error.show { display: block; }
+  .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+  .hint { font-size: 11.5px; color: #6b7280; margin-top: -6px; margin-bottom: 12px; }
+
+  @media (max-width: 480px) {
+    header h1 { font-size: 18px; }
+    .price-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>แก้ไขรหัสเบิก</h1>
+    <p>โรงพยาบาลวานรนิวาส — จัดการรายการรหัสสิทธิ์เบิกอุปกรณ์ และราคาตามสิทธิ์ (UCS / OFC / LGO / NHS / PVT)</p>
+    <nav class="pagenav">
+      <a href="lockingscrew35_usage_form.html">📋 บันทึกการใช้อุปกรณ์</a>
+      <a href="device_mapping.html">🔗 จับคู่-รหัสเบิก</a>
+      <a href="edit_claim_code.html" class="current">🛠️ แก้ไขรหัสเบิก</a>
+    </nav>
+  </header>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>รายการรหัสเบิก (<span id="countLabel">0</span>)</h2>
+      <button class="primary" id="addBtn">＋ เพิ่มรหัสเบิก</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <colgroup>
+          <col class="col-code">
+          <col class="col-name">
+          <col class="col-short">
+          <col class="col-unit">
+          <col class="col-price"><col class="col-price"><col class="col-price"><col class="col-price"><col class="col-price">
+          <col class="col-actions">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>รหัส</th>
+            <th>ชื่อเต็ม</th>
+            <th>ชื่อสั้น</th>
+            <th>หน่วย</th>
+            <th class="price-th">UCS</th>
+            <th class="price-th">OFC</th>
+            <th class="price-th">LGO</th>
+            <th class="price-th">NHS</th>
+            <th class="price-th">PVT</th>
+            <th>จัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ฟอร์มเพิ่ม/แก้ไข -->
+<div class="form-overlay" id="formOverlay">
+  <div class="form-card">
+    <h3 id="formTitle">เพิ่มรหัสเบิก</h3>
+
+    <div class="form-row2">
+      <div class="form-field">
+        <label>รหัส</label>
+        <input id="f-code" placeholder="เช่น 7301">
+      </div>
+      <div class="form-field">
+        <label>หน่วย</label>
+        <input id="f-unit" placeholder="เช่น ตัว / เส้น / ชิ้น / ระดับ">
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>ชื่อ (เต็ม)</label>
+      <input id="f-name" placeholder="เช่น สกรูยึดแผ่นโลหะชนิดหัวล็อก (Lock screw)">
+    </div>
+
+    <div class="form-field">
+      <label>ชื่อสั้น</label>
+      <input id="f-short" placeholder="เช่น Lock screw">
+    </div>
+
+    <div class="form-field">
+      <label>ราคาตามสิทธิ์ (บาท)</label>
+      <div class="price-grid">
+        <div class="form-field"><label>UCS</label><input id="f-price-UCS" placeholder="—"></div>
+        <div class="form-field"><label>OFC</label><input id="f-price-OFC" placeholder="—"></div>
+        <div class="form-field"><label>LGO</label><input id="f-price-LGO" placeholder="—"></div>
+        <div class="form-field"><label>NHS</label><input id="f-price-NHS" placeholder="—"></div>
+        <div class="form-field"><label>PVT</label><input id="f-price-PVT" placeholder="—"></div>
+      </div>
+      <div class="hint">เว้นว่างช่องใด = ไม่มีราคาสำหรับสิทธิ์นั้น (แสดงเป็น —)</div>
+    </div>
+
+    <div class="form-error" id="formError"></div>
+
+    <div class="form-actions">
+      <button class="secondary" id="formCancelBtn">ยกเลิก</button>
+      <button class="primary" id="formSaveBtn">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const RIGHT_KEYS = ['UCS', 'OFC', 'LGO', 'NHS', 'PVT'];
+
+  // ที่มา: GSheet "ระบบรายการอุปกรณ์เบิกได้ตามสิทธิ 2569"
+  let claimCodes = [
+    { code: '7301', name: 'สกรูยึดแผ่นโลหะชนิดหัวล็อก (Lock screw)', short: 'Lock screw', unit: 'ตัว',
+      prices: { UCS: 1600, OFC: 2400, LGO: 2400, NHS: 2400, PVT: 2400 } },
+    { code: '7302', name: 'สกรูยึดแผ่นโลหะดามกระดูก (Cortex screw)', short: 'Cortex screw', unit: 'ตัว',
+      prices: { UCS: 270, OFC: 300, LGO: 300, NHS: 300, PVT: 300 } },
+    { code: '7313', name: 'K-wire', short: 'K-wire', unit: 'เส้น',
+      prices: { UCS: 200, OFC: 300, LGO: 300, NHS: 300, PVT: 300 } },
+    { code: '7315', name: 'สกรูยึดกระดูกชนิดมีรูสอดแกนนำทาง (Cannulated screw)', short: 'Cannulated screw', unit: 'ตัว',
+      prices: { UCS: 2000, OFC: 3000, LGO: 3000, NHS: 3000, PVT: 3000 } },
+    { code: '7312', name: 'ลวด (Cerclage wire)', short: 'Cerclage wire', unit: 'เส้น',
+      prices: { UCS: null, OFC: 1500, LGO: 1500, NHS: 1500, PVT: 1500 } },
+    { code: '7210', name: 'แผ่นโลหะดามกระดูก ชนิดแคบ (Narrow plate)', short: 'Narrow plate', unit: 'ชิ้น',
+      prices: { UCS: 2200, OFC: 5000, LGO: 5000, NHS: 5000, PVT: 5000 } },
+    { code: '7212', name: 'แผ่นโลหะดามกระดูก ชนิดเล็ก (Small fragment plate)', short: 'Small fragment plate', unit: 'ชิ้น',
+      prices: { UCS: 1300, OFC: 1500, LGO: 1500, NHS: 1500, PVT: 1500 } },
+    { code: '7214A', name: 'แผ่นโลหะดามกระดูก ชนิดหัวล็อก (Locking compression plate)', short: 'Locking plate A', unit: 'ชิ้น',
+      prices: { UCS: 10000, OFC: 10000, LGO: 10000, NHS: 10000, PVT: 10000 } },
+    { code: '7214B', name: 'แผ่นโลหะดามกระดูก ชนิดหัวล็อกสำหรับใส่ข้อ (Distal radius)', short: 'Locking plate B', unit: 'ชิ้น',
+      prices: { UCS: 17000, OFC: 17000, LGO: 17000, NHS: 17000, PVT: 17000 } },
+    { code: '7207A', name: 'แผ่นดามกระดูกสันหลัง ส่วนคอ (Cervical locking plate)', short: 'Cervical plate A', unit: 'ระดับ',
+      prices: { UCS: 24000, OFC: 24000, LGO: 24000, NHS: 24000, PVT: 24000 } },
+    { code: '7207B', name: 'แผ่นดามกระดูกสันหลัง ส่วนคอ (Cervical locking plate)', short: 'Cervical plate B', unit: 'ระดับ',
+      prices: { UCS: 12000, OFC: 12000, LGO: 12000, NHS: 12000, PVT: 12000 } }
+  ];
+
+  let editingCode = null; // null = เพิ่มใหม่, string = แก้ไขรหัสนี้
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function money(n) {
+    return n == null ? null : n.toLocaleString('th-TH');
+  }
+
+  function priceCellHtml(val) {
+    return val == null ? '<span class="muted">—</span>' : escapeHtml(money(val));
+  }
+
+  function rowHtml(item) {
+    const priceCells = RIGHT_KEYS.map(k => `<td class="price-td">${priceCellHtml(item.prices[k])}</td>`).join('');
+    return `<tr data-code="${escapeHtml(item.code)}">
+      <td class="code-cell">${escapeHtml(item.code)}</td>
+      <td class="name-cell" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</td>
+      <td>${escapeHtml(item.short)}</td>
+      <td>${escapeHtml(item.unit)}</td>
+      ${priceCells}
+      <td style="white-space:nowrap;">
+        <button class="secondary" data-action="edit">แก้ไข</button>
+        <button class="danger" data-action="delete">ลบ</button>
+      </td>
+    </tr>`;
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('tbody');
+    if (claimCodes.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="10">ยังไม่มีรายการรหัสเบิก</td></tr>';
+    } else {
+      tbody.innerHTML = claimCodes.map(rowHtml).join('');
+    }
+    document.getElementById('countLabel').textContent = claimCodes.length;
+  }
+
+  document.getElementById('tbody').addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const tr = e.target.closest('tr');
+    const code = tr.dataset.code;
+    const item = claimCodes.find(x => x.code === code);
+    if (!item) return;
+
+    if (btn.dataset.action === 'edit') {
+      openForm(item);
+    } else if (btn.dataset.action === 'delete') {
+      if (confirm(`ต้องการลบรหัสเบิก "${code} · ${item.short || item.name}" หรือไม่?`)) {
+        claimCodes = claimCodes.filter(x => x.code !== code);
+        renderTable();
+      }
+    }
+  });
+
+  function openForm(item) {
+    editingCode = item ? item.code : null;
+    document.getElementById('formTitle').textContent = item ? `แก้ไขรหัสเบิก ${item.code}` : 'เพิ่มรหัสเบิก';
+    document.getElementById('f-code').value = item ? item.code : '';
+    document.getElementById('f-code').disabled = !!item;
+    document.getElementById('f-unit').value = item ? item.unit : '';
+    document.getElementById('f-name').value = item ? item.name : '';
+    document.getElementById('f-short').value = item ? item.short : '';
+    RIGHT_KEYS.forEach(k => {
+      const val = item ? item.prices[k] : null;
+      document.getElementById(`f-price-${k}`).value = (val == null) ? '' : val;
+    });
+    document.getElementById('formError').classList.remove('show');
+    document.getElementById('formOverlay').classList.add('open');
+    document.getElementById('f-code').focus();
+  }
+
+  function closeForm() {
+    document.getElementById('formOverlay').classList.remove('open');
+    document.getElementById('f-code').disabled = false;
+    editingCode = null;
+  }
+
+  function showFormError(msg) {
+    const el = document.getElementById('formError');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  document.getElementById('addBtn').addEventListener('click', () => openForm(null));
+  document.getElementById('formCancelBtn').addEventListener('click', closeForm);
+  document.getElementById('formOverlay').addEventListener('click', e => {
+    if (e.target.id === 'formOverlay') closeForm();
+  });
+
+  document.getElementById('formSaveBtn').addEventListener('click', () => {
+    const code = document.getElementById('f-code').value.trim();
+    const name = document.getElementById('f-name').value.trim();
+    const short = document.getElementById('f-short').value.trim();
+    const unit = document.getElementById('f-unit').value.trim();
+
+    if (!code) { showFormError('กรุณาระบุรหัสเบิก'); return; }
+    if (!name) { showFormError('กรุณาระบุชื่อ (เต็ม)'); return; }
+
+    const isNew = editingCode === null;
+    const codeConflict = claimCodes.some(x => x.code === code && (isNew || x.code !== editingCode));
+    if (codeConflict) { showFormError(`รหัส "${code}" มีอยู่แล้ว กรุณาใช้รหัสอื่น`); return; }
+
+    const prices = {};
+    for (const k of RIGHT_KEYS) {
+      const raw = document.getElementById(`f-price-${k}`).value.trim();
+      if (raw === '') {
+        prices[k] = null;
+      } else {
+        const num = Number(raw.replace(/,/g, ''));
+        if (isNaN(num) || num < 0) { showFormError(`ราคาสิทธิ์ ${k} ต้องเป็นตัวเลข`); return; }
+        prices[k] = num;
+      }
+    }
+
+    const newItem = { code, name, short, unit, prices };
+
+    if (isNew) {
+      claimCodes.push(newItem);
+    } else {
+      const idx = claimCodes.findIndex(x => x.code === editingCode);
+      claimCodes[idx] = newItem;
+    }
+
+    closeForm();
+    renderTable();
+  });
+
+  renderTable();
+</script>
+
+</body>
+</html>

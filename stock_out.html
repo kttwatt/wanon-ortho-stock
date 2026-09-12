@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ตัดจ่ายสต็อก — แผนผังโครง (ยังไม่ใช้งาน)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Noto Sans Thai", "Sarabun", system-ui, sans-serif; background: #f2f4f8; color: #1e293b; padding: 20px; }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  header { background: #7c2d12; color: #fff; padding: 14px 18px; border-radius: 12px 12px 0 0; font-size: 16px; font-weight: 600; }
+  nav { background: #ffedd5; border-bottom: 2px solid #fdba74; padding: 8px 18px; font-size: 13px; }
+  nav a { color: #7c2d12; text-decoration: none; margin-right: 14px; font-weight: 500; }
+  nav a.active { color: #9a3412; border-bottom: 2px solid #9a3412; }
+  .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 0 0 12px 12px; padding: 22px; }
+  .tag { display: inline-block; background: #fef9c3; color: #854d0e; border: 1px solid #facc15; font-size: 12px; padding: 4px 10px; border-radius: 20px; margin-bottom: 14px; }
+  h2 { font-size: 15px; color: #9a3412; margin: 18px 0 8px; }
+  .field { margin: 10px 0; }
+  .field label { display: block; font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 3px; }
+  .field input, .field select { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; background: #fbfdff; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .skel { border: 1px dashed #94a3b8; border-radius: 8px; padding: 10px 14px; color: #64748b; font-size: 12px; background: #f8fafc; margin: 8px 0; }
+  footer { margin: 16px 0; text-align: center; font-size: 12px; color: #94a3b8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>📤 ตัดจ่ายสต็อก (Stock Out / ใช้กับผู้ป่วย)</header>
+  <nav>
+    <a href="lockingscrew35_usage_form.html">🏥 บันทึกการใช้</a>
+    <a href="stock_in.html">📥 รับเข้า Stock</a>
+    <a class="active" href="stock_out.html">📤 ตัดจ่ายสต็อก</a>
+  </nav>
+  <div class="card">
+    <span class="tag">⏸️ โครงหน้าเท่านั้น — ยังไม่ทำอะไร วางไว้ก่อน</span>
+
+    <h2>ขั้นที่ 1 · เปิดเคส</h2>
+    <div class="row3">
+      <div class="field"><label>HN</label><input placeholder="เลข HN"></div>
+      <div class="field"><label>ห้องผ่าตัด</label><select><option>OR-1</option><option>OR-2</option><option>OR-3</option></select></div>
+      <div class="field"><label>แพทย์</label><select><option>— เลือกแพทย์ —</option></select></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>สิทธิการรักษา</label><select><option>UCS — บัตรทอง</option><option>OFC — ข้าราชการ</option><option>LGO — อปท.</option><option>NHS — สปสช.</option><option>PVT — ชำระเอง</option><option>SSS / NRH</option></select></div>
+      <div class="field"><label>วันที่ผ่าตัด</label><input type="date"></div>
+    </div>
+
+    <h2>ขั้นที่ 2 · อุปกรณ์ที่ตัดจ่าย (SKU → Lot FEFO → จำนวน)</h2>
+    <div class="skel">[ตารางรายการ: เลือก SKU (family-aware) → ระบบแนะนำ Lot ล่าสุด (FEFO) → จำนวน → ประเภท: ใช้กับผู้ป่วย / เสียหาย-หมดอายุ / ปรับปรุงนับจริง]</div>
+    <div class="skel">[ถ้า SKU แมปหลาย variant (เช่น 7004A TKA / 7004B UKA) → popup บังคับเลือกข้อบ่งใช้ก่อน snapshot ราคา] ⏳ ตัดสินใจแล้ว: ให้เลือกได้ก่อน</div>
+    <div style="font-size:12px;color:#64748b">+ ปุ่ม "＋ เพิ่มรายการอีกอุปกรณ์"</div>
+
+    <h2>ขั้นที่ 3 · ยืนยันตัดจ่าย + snapshot ราคาเบิก</h2>
+    <div class="skel">[ยอดเบิกได้ (สิทธิ, snapshot) ≠ ต้นทุน (lot) ≠ ส่วนต่าง — แสดงแยก 3 ก้อน → บันทึก fact_stock_out → dim_lot −qty → audit_log]</div>
+
+    <footer>โครงเพจสำหรับวางงานหน้า ยังไม่ต่อฐานข้อมูล</footer>
+  </div>
+</div>
+</body>
+</html>
