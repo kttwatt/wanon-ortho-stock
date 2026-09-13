@@ -229,12 +229,12 @@
     d.className = 'item';
     d.innerHTML = `
       <button class="del" onclick="this.closest('.item').remove(); calc();">✕</button>
-      <label>บริษัท / รพ. <span class="flag">เลือกอุปกรณ์ → ตั้งค่าเอง</span></label>
-      <div class="vendor-display vendorhint"></div>
       <label>ชนิดอุปกรณ์</label>
       <select class="dev" onchange="onDeviceChange(this)">
         ${deviceOptionsHTML(deviceId)}
       </select>
+      <label>บริษัท / รพ.</label>
+      <div class="vendor-display vendorhint"></div>
       <div class="row2">
         <div>
           <label>จำนวน (<span class="unitlabel"></span>)</label>
