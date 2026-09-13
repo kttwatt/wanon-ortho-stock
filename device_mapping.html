@@ -246,6 +246,47 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  /* --- ป้ายเตือนรหัสเบิกขัดแย้งข้ามบริษัท (clinicalKey เดียวกัน แต่รหัสต่างกัน) --- */
+  .conflict-banner {
+    display: none;
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    color: #92400e;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .conflict-banner.show { display: block; }
+  .conflict-banner .conflict-title {
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #b45309;
+  }
+  .conflict-banner ul { margin: 0; padding-left: 20px; }
+  .conflict-banner li { margin-bottom: 3px; }
+
+  /* --- แถวลูกในกลุ่ม clinicalKey เดียวกัน (คนละบริษัท) จัดชิดกันใต้แถวแรกของกลุ่ม --- */
+  tr.group-child td:first-child {
+    border-left: 3px solid #5eead4;
+    padding-left: 20px;
+  }
+  tr.group-child { background: #f7fffd; }
+  .group-indent-icon { color: #0f766e; font-weight: 700; margin-right: 4px; }
+  .group-badge-row { margin-top: 3px; }
+  .multi-vendor-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    color: #0f766e;
+    background: #ccfbf1;
+    border: 1px solid #5eead4;
+    padding: 1px 7px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
 </style>
 </head>
 <body>
@@ -301,6 +342,10 @@
       </table>
     </div>
   </div>
+</div>
+
+<div style="max-width:900px;margin:0 auto;">
+  <div class="conflict-banner" id="conflictBanner"></div>
 </div>
 
 <footer class="bar">
@@ -371,6 +416,9 @@
     { id: 1, category: 'screw-locking', family: 'Locking screws 3.5', itemName: 'Self Tapping Locking screw 3.5×30mm', vendor: 'Emerson', code: '7301', variant: '', note: '', locked: true },
     { id: 2, category: 'screw-locking', family: 'Locking screws 3.5', itemName: 'Self Tapping Locking screw 3.5×50mm', vendor: 'Emerson', code: '7301', variant: '', note: '', locked: true },
     { id: 3, category: 'screw-cortex', family: 'Cortex screws', itemName: 'Cortex screw 3.5×24mm', vendor: 'รพ.', code: '7302', variant: '', note: '', locked: true },
+    { id: 31, category: 'screw-cortex', family: 'Cortex screws', itemName: 'Cortex screw 3.5×24mm', vendor: 'Emerson', code: '7302', variant: '', note: 'ซ้ำ ถือ 2 บริษัท (รหัสตรง)', locked: true },
+    { id: 32, category: 'screw-cortex', family: 'Cortex screws', itemName: 'Cortex screw 3.5×30mm', vendor: 'Emerson', code: '7303', variant: '', note: 'ตัวอย่างรหัสขัดแย้ง (ควรเป็น 7302)', locked: true },
+    { id: 33, category: 'screw-cortex', family: 'Cortex screws', itemName: 'Cortex screw 3.5×30mm', vendor: 'รพ.', code: '7302', variant: '', note: 'คู่กับ Emerson (รหัสต่าง → ต้องเตือน)', locked: true },
     { id: 4, category: 'screw-cortex', family: 'Cortex screws', itemName: 'Cortex screw 4.5×40mm', vendor: 'รพ.', code: '7302', variant: '', note: '', locked: true },
     ...kwireRows,
     { id: 7, category: 'cannulated', family: 'Cannulated screws', itemName: 'Cannulated Locking screw 6.5×60mm', vendor: 'Emerson', code: '7315', variant: '', note: '', locked: true },
@@ -403,6 +451,81 @@
     if (!d.code || !r) return false;
     if (r.variants) return !!d.variant;
     return true;
+  }
+
+  // --- clinicalKey: กลุ่มอุปกรณ์ "ตัวเดียวกันทางคลินิก" ไม่ว่าจะมาจากบริษัทไหน ---
+  // ดึงจาก (หมวด + ขนาด) ด้วย regex เดียวกันเสมอ เช่น "Cortex screw 3.5×24mm" → "cortex-3.5x24"
+  // ถ้าดึงขนาดแบบ กว้างxยาว ไม่ได้ (ไม่มีรูปแบบตัวเลข x ตัวเลข) → fallback ไปที่ family/category แทน
+  function deriveClinicalKey(d) {
+    const catPart = (d.category || 'unk').toLowerCase().replace(/^screw-/, '');
+    const text = `${d.itemName || ''} ${d.family || ''}`;
+    const sizeMatch = text.match(/(\d+(?:\.\d+)?)\s*[x×X]\s*(\d+(?:\.\d+)?)/);
+    if (sizeMatch) {
+      return `${catPart}-${sizeMatch[1]}x${sizeMatch[2]}`;
+    }
+    const fam = (d.family || '').trim();
+    if (fam) {
+      return `${catPart}-${fam.toLowerCase().replace(/\s+/g, '-')}`;
+    }
+    return catPart;
+  }
+
+  // จัดกลุ่มรายการในหมวดเดียวกันตาม clinicalKey ให้แถวที่เป็นของเดียวกัน (คนละบริษัท) อยู่ติดกัน
+  // คงลำดับการปรากฏครั้งแรกของแต่ละกลุ่มไว้ (ไม่กระจายตาม id)
+  function buildGroupedRows(items) {
+    const order = [];
+    const groups = {};
+    items.forEach(d => {
+      const key = deriveClinicalKey(d);
+      if (!groups[key]) { groups[key] = []; order.push(key); }
+      groups[key].push(d);
+    });
+    const result = [];
+    order.forEach(key => {
+      const list = groups[key];
+      const vendorsSet = new Set(list.map(d => d.vendor || '—'));
+      const multiVendor = vendorsSet.size > 1;
+      list.forEach((d, idx) => {
+        result.push({ device: d, groupIndex: idx, groupSize: list.length, multiVendor, clinicalKey: key });
+      });
+    });
+    return result;
+  }
+
+  // ตรวจรหัสเบิกขัดแย้งข้ามบริษัท: clinicalKey เดียวกัน แต่ "รหัสหลัก" (code) ต่างกัน
+  // ข้อยกเว้น: ถ้า code เดียวกันแต่ variant ต่างกัน (เช่น 7214A vs 7214B) ถือเป็นราคาต่างจริง ไม่เตือน
+  function findClinicalKeyConflicts() {
+    const groups = {};
+    devices.forEach(d => {
+      if (!d.code) return; // ยังไม่จับคู่ ข้ามไปก่อน
+      const key = deriveClinicalKey(d);
+      (groups[key] = groups[key] || []).push(d);
+    });
+    const conflicts = [];
+    Object.keys(groups).forEach(key => {
+      const list = groups[key];
+      if (list.length < 2) return;
+      const baseCodes = [...new Set(list.map(d => d.code))];
+      if (baseCodes.length < 2) return; // code เดียวกัน (variant ต่างได้ ไม่ถือว่าขัดแย้ง)
+      const label = list[0].itemName || list[0].family || key;
+      const parts = list.map(d => `${d.vendor || '—'} = ${d.code}${d.variant || ''}`);
+      conflicts.push({ key, label, parts });
+    });
+    return conflicts;
+  }
+
+  function renderConflictBanner(conflicts) {
+    const banner = document.getElementById('conflictBanner');
+    if (!conflicts.length) {
+      banner.classList.remove('show');
+      banner.innerHTML = '';
+      return;
+    }
+    const items = conflicts.map(c =>
+      `<li>⚠️ "${escapeHtml(c.label)}" มีรหัสเบิกไม่ตรงกัน: ${escapeHtml(c.parts.join(' / '))}</li>`
+    ).join('');
+    banner.innerHTML = `<div class="conflict-title">⚠️ พบรหัสเบิกไม่ตรงกันข้ามบริษัท (${conflicts.length} กลุ่ม) — ตรวจสอบก่อนยืนยันบันทึก</div><ul>${items}</ul>`;
+    banner.classList.add('show');
   }
 
   function vendorOptions(selected) {
@@ -493,7 +616,15 @@
     return html;
   }
 
-  function rowHtml(d) {
+  function rowHtml(d, meta) {
+    meta = meta || { groupIndex: 0, groupSize: 1, multiVendor: false, clinicalKey: deriveClinicalKey(d) };
+    const isGroupChild = meta.groupIndex > 0;
+    const showMultiVendorBadge = meta.groupIndex === 0 && meta.multiVendor;
+    const indentPrefix = isGroupChild ? '<span class="group-indent-icon">↳</span>' : '';
+    const badgeHtml = showMultiVendorBadge
+      ? `<span class="multi-vendor-badge" title="กลุ่มคลินิก &quot;${escapeHtml(meta.clinicalKey)}&quot; มีรหัสจากหลายบริษัท">🏷️ ${meta.groupSize} แหล่ง</span>`
+      : '';
+
     const rights = RIGHTS[d.code];
     const showVariant = rights && rights.variants;
     const info = getRightsInfo(d.code, d.variant);
@@ -512,8 +643,9 @@
     if (d.locked) {
       // --- VIEW MODE: ข้อความล้วน ---
       deviceCellHtml =
-        `<div class="item-name-view" title="${escapeHtml(d.itemName)}">${d.itemName ? escapeHtml(d.itemName) : '—'}</div>` +
-        `<div class="family-view" title="${escapeHtml(d.family)}">${d.family ? escapeHtml(d.family) : '—'}</div>`;
+        `<div class="item-name-view" title="${escapeHtml(d.itemName)}">${indentPrefix}${d.itemName ? escapeHtml(d.itemName) : '—'}</div>` +
+        `<div class="family-view" title="${escapeHtml(d.family)}">${d.family ? escapeHtml(d.family) : '—'}</div>` +
+        (badgeHtml ? `<div class="group-badge-row">${badgeHtml}</div>` : '');
       vendorCellHtml = `<div class="vendor-view" title="${escapeHtml(d.vendor)}">${d.vendor ? escapeHtml(d.vendor) : '—'}</div>`;
       codeCellHtml = codeViewHtml(d);
       noteCellHtml = `<div class="note-view ${d.note ? '' : 'muted'}" title="${escapeHtml(d.note)}">${d.note ? escapeHtml(d.note) : '—'}</div>`;
@@ -521,7 +653,8 @@
       // --- EDIT MODE: dropdown/input เหมือนเดิม ---
       deviceCellHtml =
         `<input class="item-name-input" data-field="itemName" value="${escapeHtml(d.itemName)}">` +
-        `<select class="family-select" data-field="family">${familyOptions(d.family)}</select>`;
+        `<select class="family-select" data-field="family">${familyOptions(d.family)}</select>` +
+        (badgeHtml ? `<div class="group-badge-row">${badgeHtml}</div>` : '');
       vendorCellHtml = `<select data-field="vendor">${vendorOptions(d.vendor)}</select>`;
       codeCellHtml =
         `<select data-field="code">${codeOptions(d.code)}</select>` +
@@ -529,7 +662,7 @@
       noteCellHtml = `<input data-field="note" value="${escapeHtml(d.note)}" placeholder="—">`;
     }
 
-    return `<tr data-id="${d.id}">
+    return `<tr data-id="${d.id}" data-clinical-key="${escapeHtml(meta.clinicalKey)}" class="${isGroupChild ? 'group-child' : ''}">
       <td>${deviceCellHtml}</td>
       <td>${vendorCellHtml}</td>
       <td>${codeCellHtml}</td>
@@ -561,7 +694,8 @@
       );
       if (items.length === 0) return;
       html += sectionRowHtml(catKey, items.length);
-      html += items.map(rowHtml).join('');
+      // จัดกลุ่มแถวที่เป็นของเดียวกันทางคลินิก (clinicalKey เดียวกัน คนละบริษัท) ให้อยู่ติดกัน
+      html += buildGroupedRows(items).map(g => rowHtml(g.device, g)).join('');
     });
     tbody.innerHTML = html;
     updateFooter();
@@ -595,6 +729,23 @@
     } else {
       d[field] = e.target.value;
     }
+
+    // กันแถวซ้ำ: แถวที่กำลังแก้ไข (ยังไม่ล็อก) ตั้งค่า itemName+vendor ตรงกับ clinicalKey+vendor ของแถวอื่นที่มีอยู่แล้ว
+    if (!d.locked && ['itemName', 'family', 'vendor'].includes(field) && d.itemName && d.vendor) {
+      const dupKey = deriveClinicalKey(d);
+      const dup = devices.find(x => x.id !== d.id && x.vendor === d.vendor && deriveClinicalKey(x) === dupKey);
+      if (dup) {
+        const goEditExisting = confirm(
+          `มี mapping นี้อยู่แล้ว (${dup.itemName || dup.family || dup.code} — ${dup.vendor}, รหัส ${dup.code || '—'})\nต้องการแก้ไขแถวเดิมแทนหรือไม่?`
+        );
+        if (goEditExisting) {
+          const idx = devices.findIndex(x => x.id === d.id);
+          devices.splice(idx, 1);
+          dup.locked = false;
+        }
+      }
+    }
+
     renderTable();
   });
 
@@ -631,6 +782,9 @@
   });
 
   document.getElementById('saveBtn').addEventListener('click', () => {
+    const conflicts = findClinicalKeyConflicts();
+    renderConflictBanner(conflicts);
+
     const matched = devices.filter(isMatched).length;
     alert(`บันทึกข้อมูลเรียบร้อย\nอุปกรณ์ทั้งหมด: ${devices.length} รายการ\nจับคู่รหัสสิทธิ์แล้ว: ${matched} รายการ\nยังไม่จับคู่: ${devices.length - matched} รายการ`);
   });
