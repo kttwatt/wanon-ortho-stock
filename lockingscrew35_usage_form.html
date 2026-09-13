@@ -6,48 +6,43 @@
 <title>บันทึกการใช้อุปกรณ์ — ศัลยกรรมกระดูก</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: "Noto Sans Thai", "Sarabun", system-ui, sans-serif; background: #f2f4f8; color: #1e293b; padding: 20px; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, Helvetica, Arial, "Noto Sans Thai", sans-serif; background: #262421; color: #ffffff; padding: 20px; }
   .wrap { max-width: 640px; margin: 0 auto; }
-  header { background: #0f766e; color: #fff; padding: 16px 20px; border-radius: 12px 12px 0 0; }
+  header { background: #1a1816; color: #fff; padding: 16px 20px; border-radius: 12px 12px 0 0; border: 1px solid rgba(255,255,255,.18); border-bottom: none; }
   header h1 { font-size: 18px; }
-  header p { font-size: 13px; opacity: .85; margin-top: 4px; }
-  nav.pagenav { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-  nav.pagenav a {
-    font-size: 12px; color: #fff; text-decoration: none;
-    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35);
-    padding: 5px 11px; border-radius: 999px; font-weight: 600;
-  }
-  nav.pagenav a:hover { background: rgba(255,255,255,.25); }
-  nav.pagenav a.current { background: #fff; color: #0f766e; border-color: #fff; }
-  .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 0 0 12px 12px; padding: 20px; }
+  header p { font-size: 13px; color: #989797; margin-top: 4px; }
+  .card { background: #312e2b; border: 1px solid rgba(255,255,255,.18); border-radius: 0 0 12px 12px; padding: 20px; }
   .section { margin-bottom: 18px; }
-  .section h2 { font-size: 14px; color: #0f766e; border-bottom: 2px solid #ccfbf1; padding-bottom: 6px; margin-bottom: 12px; }
-  label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; color: #334155; }
-  input, select, textarea { width: 100%; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #fff; }
-  input:focus, select:focus { outline: 2px solid #14b8a6; border-color: #14b8a6; }
+  .section h2 { font-size: 14px; color: #cfd81a; border-bottom: 2px solid rgba(255,255,255,.12); padding-bottom: 6px; margin-bottom: 12px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; color: #989797; }
+  input, select, textarea { width: 100%; padding: 9px 10px; border: 1px solid rgba(255,255,255,.18); border-radius: 8px; font-size: 14px; background: #1f1d1b; color: #ffffff; }
+  input::placeholder { color: rgba(255,255,255,.5); }
+  input:focus, select:focus { outline: 2px solid #ffffff; border-color: #ffffff; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  .ro { background: #f8fafc; }
-  .readonly { background: #f1f5f9; color: #475569; }
+  .ro { background: #1a1816; }
+  .readonly { background: #1a1816; color: rgba(255,255,255,.7); }
   .price { font-size: 16px; font-weight: 700; }
-  .price.claim { color: #0f766e; }
+  .price.claim { color: #cfd81a; }
   .price.cost { color: #b45309; }
   .totalbar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 14px; }
-  .tot { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: center; }
-  .tot .lbl { font-size: 12px; color: #64748b; }
-  .tot .val { font-size: 18px; font-weight: 700; margin-top: 4px; }
-  .tot.claim { border-color: #99f6e4; background: #f0fdfa; }
-  .tot.cost { border-color: #fed7aa; background: #fff7ed; }
-  .tot.var { border-color: #ddd6fe; background: #f5f3ff; }
-  .warn { background: #fef9c3; border: 1px solid #facc15; color: #854d0e; padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-top: 10px; display: none; }
-  .btn { display: inline-block; background: #0f766e; color: #fff; border: none; border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 12px; }
-  .btn.secondary { background: #fff; color: #0f766e; border: 1.5px solid #0f766e; }
-  .btn:hover { opacity: .9; }
-  .item { border: 1px dashed #cbd5e1; border-radius: 10px; padding: 12px; margin-bottom: 12px; position: relative; background: #fcfdfd; }
-  .item .del { position: absolute; top: 8px; right: 10px; background: #fee2e2; color: #b91c1c; border: none; border-radius: 6px; padding: 3px 9px; font-size: 12px; cursor: pointer; }
-  .flag { display: inline-block; font-size: 11px; background: #fef9c3; color: #854d0e; border-radius: 5px; padding: 2px 6px; margin-left: 6px; }
-  .vendor-hint { font-size: 11.5px; color: #6b7280; margin-top: 3px; }
-  footer { margin-top: 16px; text-align: center; font-size: 12px; color: #94a3b8; }
+  .tot { background: #1f1d1b; border: 1px solid rgba(255,255,255,.18); border-radius: 10px; padding: 12px; text-align: center; }
+  .tot .lbl { font-size: 12px; color: #989797; }
+  .tot .val { font-size: 18px; font-weight: 700; margin-top: 4px; color: #ffffff; }
+  .tot.claim { border-color: rgba(207,216,26,.4); background: rgba(207,216,26,.08); }
+  .tot.cost { border-color: rgba(180,83,9,.45); background: rgba(180,83,9,.1); }
+  .tot.var { border-color: rgba(255,255,255,.18); background: #3d3a37; }
+  .warn { background: rgba(180,83,9,.15); border: 1px solid #b45309; color: #fcd34d; padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-top: 10px; display: none; }
+  .btn { display: inline-block; background: #ffffff; color: #1a1816; border: none; border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 12px; }
+  .btn:hover { background: rgba(255,255,255,.85); }
+  .btn.secondary { background: rgba(255,255,255,.08); color: #ffffff; border: 1.5px solid rgba(255,255,255,.18); }
+  .btn.secondary:hover { background: rgba(255,255,255,.16); }
+  .item { border: 1px dashed rgba(255,255,255,.25); border-radius: 10px; padding: 12px; margin-bottom: 12px; position: relative; background: #272522; }
+  .item .del { position: absolute; top: 8px; right: 10px; background: rgba(185,28,28,.22); color: #f87171; border: none; border-radius: 6px; padding: 3px 9px; font-size: 12px; cursor: pointer; }
+  .item .del:hover { background: rgba(185,28,28,.4); }
+  .flag { display: inline-block; font-size: 11px; background: rgba(180,83,9,.22); color: #fbbf24; border-radius: 5px; padding: 2px 6px; margin-left: 6px; }
+  .vendor-hint { font-size: 11.5px; color: rgba(255,255,255,.5); margin-top: 3px; }
+  footer { margin-top: 16px; text-align: center; font-size: 12px; color: rgba(255,255,255,.5); }
 </style>
 </head>
 <body>
@@ -55,7 +50,7 @@
   <header>
     <h1>📋 บันทึกการใช้อุปกรณ์ — ศัลยกรรมกระดูก</h1>
     <p>รวมรายการอุปกรณ์ทั้งหมดจากหน้าจับคู่รหัสสิทธิ์ (26 รายการ) · demo — ยังไม่เชื่อมฐานข้อมูลจริง</p>
-    <nav class="pagenav">
+  <nav class="pagenav">
       <a href="lockingscrew35_usage_form.html" class="current">📋 บันทึกการใช้อุปกรณ์</a>
       <a href="device_mapping.html">🔗 จับคู่-รหัสเบิก</a>
       <a href="edit_claim_code.html">🛠️ แก้ไขรหัสเบิก</a>
