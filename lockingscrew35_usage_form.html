@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>บันทึกการใช้อุปกรณ์ — ศัลยกรรมกระดูก</title>
+<title>บันทึกการใช้อุปกรณ์ — ศัลยกรรมกระดูก (v5)</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: "Noto Sans Thai", "Sarabun", system-ui, sans-serif; background: #f2f4f8; color: #1e293b; padding: 20px; }
@@ -19,6 +19,11 @@
   }
   nav.pagenav a:hover { background: rgba(255,255,255,.25); }
   nav.pagenav a.current { background: #fff; color: #0f766e; border-color: #fff; }
+  .mixed-badge {
+    display: inline-block; margin-top: 8px; font-size: 12.5px; font-weight: 600;
+    background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.35);
+    padding: 5px 11px; border-radius: 8px;
+  }
   .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 0 0 12px 12px; padding: 20px; }
   .section { margin-bottom: 18px; }
   .section h2 { font-size: 14px; color: #0f766e; border-bottom: 2px solid #ccfbf1; padding-bottom: 6px; margin-bottom: 12px; }
@@ -32,27 +37,49 @@
   .price { font-size: 16px; font-weight: 700; }
   .price.claim { color: #0f766e; }
   .price.cost { color: #b45309; }
-  .totalbar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .totalbar-split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .totalbar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
   .tot { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; text-align: center; }
   .tot .lbl { font-size: 12px; color: #64748b; }
   .tot .val { font-size: 18px; font-weight: 700; margin-top: 4px; }
   .tot.claim { border-color: #99f6e4; background: #f0fdfa; }
   .tot.cost { border-color: #fed7aa; background: #fff7ed; }
   .tot.var { border-color: #ddd6fe; background: #f5f3ff; }
+  .tot.hosp { border-color: #bbf7d0; background: #f0fdf4; }
+  .tot.other { border-color: #bfdbfe; background: #eff6ff; }
+  .claim-note { font-size: 11.5px; color: #64748b; margin-top: 8px; line-height: 1.5; }
   .warn { background: #fef9c3; border: 1px solid #facc15; color: #854d0e; padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-top: 10px; display: none; }
   .btn { display: inline-block; background: #0f766e; color: #fff; border: none; border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 12px; }
   .btn.secondary { background: #fff; color: #0f766e; border: 1.5px solid #0f766e; }
   .btn:hover { opacity: .9; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
   .item { border: 1px dashed #cbd5e1; border-radius: 10px; padding: 12px; margin-bottom: 12px; position: relative; background: #fcfdfd; }
   .item .del { position: absolute; top: 8px; right: 10px; background: #fee2e2; color: #b91c1c; border: none; border-radius: 6px; padding: 3px 9px; font-size: 12px; cursor: pointer; }
   .flag { display: inline-block; font-size: 11px; background: #fef9c3; color: #854d0e; border-radius: 5px; padding: 2px 6px; margin-left: 6px; }
   .vendor-hint { font-size: 11.5px; color: #6b7280; margin-top: 3px; }
   .vendor-display {
     background: #eef2f6; border: 1px solid #cbd5e1; border-radius: 8px;
-    padding: 8px 10px; font-weight: 700; color: #0f766e; margin-bottom: 8px;
-    min-height: 14px;
+    padding: 8px 10px; margin-bottom: 8px;
+    min-height: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   }
   footer { margin-top: 16px; text-align: center; font-size: 12px; color: #94a3b8; }
+
+  /* ---- badge แหล่งอุปกรณ์ (รพ. / Emerson / Rockwood / MDC) ---- */
+  .src-badge {
+    display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700;
+    padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+  }
+  .src-badge.src-hosp     { background: #dcfce7; color: #166534; }
+  .src-badge.src-emerson  { background: #dbeafe; color: #1e40af; }
+  .src-badge.src-rockwood { background: #fef3c7; color: #92400e; }
+  .src-badge.src-mdc      { background: #f3e8ff; color: #6b21a8; }
+  .src-badge.src-other    { background: #f1f5f9; color: #475569; }
+  .stock-hint { font-size: 11.5px; color: #64748b; }
+  .cv-reason-tag { display: block; width: 100%; font-size: 11px; color: #7c3aed; }
+  .cost-hint {
+    font-size: 11.5px; color: #b45309; margin-top: 6px; background: #fff7ed;
+    border: 1px solid #fed7aa; padding: 6px 9px; border-radius: 7px;
+  }
 
   /* ---- searchable combobox (ชนิดอุปกรณ์) ---- */
   .dev-combo { position: relative; }
@@ -77,11 +104,26 @@
     border-bottom: 1px solid #ccfbf1;
   }
   .dev-combo-opt { padding: 7px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 1px; }
-  .dev-combo-opt-name { font-size: 13.5px; color: #1e293b; }
+  .dev-combo-opt-name { font-size: 13.5px; color: #1e293b; display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .dev-combo-opt-meta { font-size: 11px; color: #64748b; }
   .dev-combo-opt:hover, .dev-combo-opt.active { background: #f0fdfa; }
   .dev-combo-opt.active .dev-combo-opt-name { color: #0f766e; font-weight: 700; }
   .dev-combo-empty, .dev-combo-more { padding: 10px; font-size: 12.5px; color: #64748b; text-align: center; }
+
+  /* ---- modal ยืนยันข้ามบริษัท (default รพ. -> อื่น) ---- */
+  .cv-modal-overlay {
+    position: fixed; inset: 0; background: rgba(15,23,42,.5);
+    display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px;
+  }
+  .cv-modal-overlay.open { display: flex; }
+  .cv-modal { background: #fff; border-radius: 14px; padding: 22px; max-width: 400px; width: 100%; box-shadow: 0 20px 50px rgba(15,23,42,.3); }
+  .cv-modal h3 { font-size: 15px; color: #b45309; margin-bottom: 10px; }
+  .cv-modal p { font-size: 13.5px; color: #334155; line-height: 1.5; margin-bottom: 12px; }
+  .cv-reasons { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .cv-radio { display: flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 500; color: #1e293b; cursor: pointer; }
+  .cv-radio input { width: auto; }
+  .cv-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .cv-actions .btn { margin-top: 0; }
 </style>
 </head>
 <body>
@@ -89,6 +131,7 @@
   <header>
     <h1>📋 บันทึกการใช้อุปกรณ์ — ศัลยกรรมกระดูก</h1>
     <p>รวมรายการอุปกรณ์ทั้งหมดจากหน้าจับคู่รหัสสิทธิ์ (26 รายการ) · demo — ยังไม่เชื่อมฐานข้อมูลจริง</p>
+    <div class="mixed-badge" id="mixedBadge">เคสนี้: ยังไม่มีรายการ</div>
     <nav class="pagenav">
       <a href="lockingscrew35_usage_form.html" class="current">📋 บันทึกการใช้อุปกรณ์</a>
       <a href="device_mapping.html">🔗 จับคู่-รหัสเบิก</a>
@@ -132,11 +175,16 @@
     <!-- ยอดรวม -->
     <div class="section">
       <h2>3 · ยอดรวม</h2>
+      <div class="totalbar-split">
+        <div class="tot hosp"><div class="lbl">🏥 ยอดรวม (รพ.)</div><div class="val" id="tClaimHosp">0</div></div>
+        <div class="tot other"><div class="lbl">📦 ยอดรวม (Emerson + อื่น/consignment)</div><div class="val" id="tClaimOther">0</div></div>
+      </div>
       <div class="totalbar">
-        <div class="tot claim"><div class="lbl">ยอดเบิกได้ (สิทธิ)</div><div class="val" id="tClaim">0</div></div>
+        <div class="tot claim"><div class="lbl">ยอดรวมทั้งใบ (claim)</div><div class="val" id="tClaim">0</div></div>
         <div class="tot cost"><div class="lbl">ต้นทุนรวม</div><div class="val" id="tCost">0</div></div>
         <div class="tot var"><div class="lbl">ส่วนต่าง</div><div class="val" id="tVar">0</div></div>
       </div>
+      <p class="claim-note">* "ยอดรวมทั้งใบ (claim)" แสดงไว้เพื่ออ้างอิงสิทธิ์การเบิกของคนไข้เท่านั้น ไม่ใช่ตัวเลขใช้ปิดบัญชี — ปิดบัญชีอ้างอิงยอดแยก 2 ก้อนด้านบน (รพ. ตัดสต็อกจริง / Emerson+อื่น รอวางบิล consignment)</p>
     </div>
 
     <button class="btn" style="width:100%" onclick="submitForm()">✅ ยืนยันบันทึก</button>
@@ -144,27 +192,54 @@
   </div>
 </div>
 
+<!-- modal ยืนยันเมื่อเลือกข้ามไปบริษัทที่ไม่ใช่ รพ. -->
+<div class="cv-modal-overlay" id="cvOverlay">
+  <div class="cv-modal">
+    <h3>⚠️ ยืนยันเลือกข้ามบริษัท</h3>
+    <p id="cvText"></p>
+    <div class="cv-reasons">
+      <label class="cv-radio"><input type="radio" name="cvReason" value="สต็อก รพ.หมด/ไม่พอ"> สต็อก รพ.หมด/ไม่พอ</label>
+      <label class="cv-radio"><input type="radio" name="cvReason" value="แพทย์ระบุรุ่น/ยี่ห้อ"> แพทย์ระบุรุ่น/ยี่ห้อ</label>
+      <label class="cv-radio"><input type="radio" name="cvReason" value="อื่นๆ"> อื่นๆ</label>
+    </div>
+    <div class="cv-actions">
+      <button type="button" class="btn secondary" id="cvCancelBtn">ยกเลิก</button>
+      <button type="button" class="btn" id="cvConfirmBtn" disabled>ยืนยันใช้บริษัทนี้</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // ---- ข้อมูลจากหน้า device_mapping.html (devices + RIGHTS) ----
-  // K-wire ทุกขนาด รหัสสิทธิ์ 7313
+  // K-wire ทุกขนาด รหัสสิทธิ์ 7313 (ของ รพ. สต็อกเองทั้งหมด)
   const kwireDias = [0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.5, 3.0];
   const kwireLens = [150, 300];
   let kid = 100;
   const kwireRows = [];
   kwireLens.forEach(len => kwireDias.forEach(dia => {
-    kwireRows.push({ id: kid++, category: 'kwire', itemName: `K-wire ${dia}×${len}mm`, vendor: 'รพ.', code: '7313', variant: '' });
+    kwireRows.push({
+      id: kid++, category: 'kwire', itemName: `K-wire ${dia}×${len}mm`, vendor: 'รพ.', code: '7313', variant: '',
+      clinicalKey: `kwire-${dia}x${len}`, stock: 60, cost: 35
+    });
   }));
 
+  // แต่ละ DEVICE: { id, category, itemName, vendor, code, variant, clinicalKey, stock, cost }
+  // clinicalKey = key ที่บอกว่า "อุปกรณ์ชนิด/ขนาดเดียวกัน ต่างบริษัท" (ใช้จัดกลุ่มในผลค้นหา ไม่ใช้ itemName ตรงๆ)
+  // stock = คงเหลือสมมติของแหล่งนั้น, cost = ต้นทุนจริง/หน่วย (มีเฉพาะของ รพ. — consignment เป็น null จนกว่าจะตีราคา)
   const DEVICES = [
-    { id: 1, category: 'screw-locking', itemName: 'Self Tapping Locking screw 3.5×30mm', vendor: 'Emerson', code: '7301', variant: '' },
-    { id: 2, category: 'screw-locking', itemName: 'Self Tapping Locking screw 3.5×50mm', vendor: 'Emerson', code: '7301', variant: '' },
-    { id: 3, category: 'screw-cortex', itemName: 'Cortex screw 3.5×24mm', vendor: 'รพ.', code: '7302', variant: '' },
-    { id: 4, category: 'screw-cortex', itemName: 'Cortex screw 4.5×40mm', vendor: 'รพ.', code: '7302', variant: '' },
+    { id: 1, category: 'screw-locking', itemName: 'Self Tapping Locking screw 3.5×30mm', vendor: 'Emerson', code: '7301', variant: '', clinicalKey: 'lock-3.5x30', stock: 15, cost: null },
+    { id: 2, category: 'screw-locking', itemName: 'Self Tapping Locking screw 3.5×50mm', vendor: 'Emerson', code: '7301', variant: '', clinicalKey: 'lock-3.5x50', stock: 12, cost: null },
+    { id: 3, category: 'screw-cortex', itemName: 'Cortex screw 3.5×24mm', vendor: 'รพ.', code: '7302', variant: '', clinicalKey: 'cortex-3.5x24', stock: 42, cost: 180 },
+    { id: 4, category: 'screw-cortex', itemName: 'Cortex screw 4.5×40mm', vendor: 'รพ.', code: '7302', variant: '', clinicalKey: 'cortex-4.5x40', stock: 30, cost: 220 },
     ...kwireRows,
-    { id: 7, category: 'cannulated', itemName: 'Cannulated Locking screw 6.5×60mm', vendor: 'Emerson', code: '7315', variant: '' },
-    { id: 8, category: 'wire', itemName: 'Cerclage wire 18 gauge', vendor: 'Emerson', code: '7312', variant: '' },
-    { id: 9, category: 'plate', itemName: 'Small DCP Plate 4H L', vendor: 'รพ.', code: '7214', variant: 'A' },
-    { id: 10, category: 'plate', itemName: 'Distal Radius Locking Plate 2H L (VA)', vendor: 'Rockwood', code: '7214', variant: 'B' }
+    { id: 7, category: 'cannulated', itemName: 'Cannulated Locking screw 6.5×60mm', vendor: 'Emerson', code: '7315', variant: '', clinicalKey: 'cannulated-6.5x60', stock: 10, cost: null },
+    { id: 8, category: 'wire', itemName: 'Cerclage wire 18 gauge', vendor: 'Emerson', code: '7312', variant: '', clinicalKey: 'wire-cerclage-18g', stock: 25, cost: null },
+    { id: 9, category: 'plate', itemName: 'Small DCP Plate 4H L', vendor: 'รพ.', code: '7214', variant: 'A', clinicalKey: 'plate-dcp-4hl', stock: 12, cost: 3500 },
+    { id: 10, category: 'plate', itemName: 'Distal Radius Locking Plate 2H L (VA)', vendor: 'Rockwood', code: '7214', variant: 'B', clinicalKey: 'plate-distal-2hl-va', stock: 6, cost: null },
+    // ---- รายการที่ "ซ้ำบริษัท" (โจทย์หัวข้อ 3) และรายการที่ รพ. ไม่มีสต็อกเอง (โจทย์หัวข้อ 8) ----
+    { id: 11, category: 'screw-cortex', itemName: 'Cortex screw 3.5×24mm', vendor: 'Emerson', code: '7302', variant: '', clinicalKey: 'cortex-3.5x24', stock: 15, cost: null },
+    { id: 12, category: 'screw-locking', itemName: 'Self Tapping Locking screw 3.5×28mm', vendor: 'Emerson', code: '7301', variant: '', clinicalKey: 'lock-3.5x28', stock: 20, cost: null },
+    { id: 13, category: 'plate', itemName: 'Locking plate รุ่น X (Distal Femur)', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'plate-x', stock: 5, cost: null }
   ];
 
   const CATEGORY_ORDER = ['screw-cortex', 'screw-locking', 'cannulated', 'kwire', 'plate', 'wire'];
@@ -178,6 +253,7 @@
   };
 
   // ราคา 5 สิทธิ์ต่อรหัส — เฉพาะรหัสที่ใช้จริงในรายการอุปกรณ์ข้างต้น (จาก RIGHTS ในหน้า device_mapping.html)
+  // ราคาเบิกอิงตามรหัสสิทธิ์ ไม่อิงบริษัท — ของ รพ./Emerson/Rockwood ที่รหัสเดียวกันเบิกราคาเท่ากัน
   const RIGHTS = {
     '7301': { name: 'สกรูยึดแผ่นโลหะชนิดหัวล็อก (Lock screw)', short: 'Lock screw', unit: 'ตัว',
       prices: { UCS: 1600, OFC: 2400, LGO: 2400, NHS: 2400, PVT: 2400 } },
@@ -223,6 +299,18 @@
     return device.code + (device.variant ? device.variant : '');
   }
 
+  // ---- แหล่งอุปกรณ์ (บริษัท) : badge icon/สี ----
+  function vendorBadge(vendor){
+    const map = {
+      'รพ.':      { icon: '🏥', cls: 'src-hosp' },
+      'Emerson':  { icon: '📦', cls: 'src-emerson' },
+      'Rockwood': { icon: '🏭', cls: 'src-rockwood' },
+      'MDC':      { icon: '🏷️', cls: 'src-mdc' }
+    };
+    return map[vendor] || { icon: '❔', cls: 'src-other' };
+  }
+  function isHospitalVendor(vendor){ return vendor === 'รพ.'; }
+
   function deviceOptionsHTML(selectedId){
     let html = '';
     CATEGORY_ORDER.forEach(catKey => {
@@ -243,15 +331,34 @@
     const vendorhint = it.querySelector('.vendorhint');
     const codeInput = it.querySelector('.code');
     const unitlabel = it.querySelector('.unitlabel');
+    const costInput = it.querySelector('.costpx');
+    const costHint = it.querySelector('.cost-hint');
     if (!device) {
-      vendorhint.textContent = '— ยังไม่ได้เลือกอุปกรณ์ —';
+      vendorhint.innerHTML = '— ยังไม่ได้เลือกอุปกรณ์ —';
       codeInput.value = '';
       unitlabel.textContent = '-';
+      costHint.style.display = 'none';
+      delete it.dataset.crossVendorReason;
       return;
     }
-    vendorhint.textContent = device.vendor;
+    const vb = vendorBadge(device.vendor);
+    const stockText = (device.stock != null) ? `เหลือ ${device.stock}` : '';
+    vendorhint.innerHTML =
+      `<span class="src-badge ${vb.cls}">${vb.icon} ${escapeHtml(device.vendor)}</span>` +
+      (stockText ? `<span class="stock-hint">${stockText}</span>` : '') +
+      (it.dataset.crossVendorReason ? `<span class="cv-reason-tag">เหตุผลข้ามบริษัท: ${escapeHtml(it.dataset.crossVendorReason)}</span>` : '');
     codeInput.value = codeLabel(device);
     unitlabel.textContent = rightsInfo(device) ? rightsInfo(device).unit : '-';
+
+    // ต้นทุน: รพ. ดึงต้นทุนจริงอัตโนมัติถ้ามี, บริษัทอื่น (consignment) เว้นว่าง+โชว์ hint
+    if (isHospitalVendor(device.vendor)) {
+      costInput.value = (device.cost != null) ? device.cost : '';
+      costHint.style.display = 'none';
+    } else {
+      costInput.value = '';
+      costHint.style.display = 'block';
+      costHint.textContent = `🏷️ ${device.vendor} (consignment) — ยังไม่ตีราคา ใส่ภายหลังได้เมื่อได้ใบวางบิลจริง`;
+    }
   }
 
   function onDeviceChange(sel){
@@ -283,6 +390,21 @@
     return DEVICES.filter(d => deviceSearchText(d).includes(q));
   }
 
+  // จัดกลุ่มรายการที่ clinicalKey เดียวกัน (อุปกรณ์เดียวกันคนละบริษัท) ให้อยู่ติดกัน
+  // และให้แถว รพ. ขึ้นก่อนเสมอ (default ที่ปลอดภัยกว่า) โดยไม่กระทบลำดับของ clinicalKey อื่นที่ไม่เกี่ยวข้อง
+  function sortForDisplay(items){
+    const firstIndex = {};
+    items.forEach((d, i) => {
+      const k = d.clinicalKey || d.itemName;
+      if (!(k in firstIndex)) firstIndex[k] = i;
+    });
+    return items.slice().sort((a, b) => {
+      const ak = a.clinicalKey || a.itemName, bk = b.clinicalKey || b.itemName;
+      if (ak !== bk) return firstIndex[ak] - firstIndex[bk];
+      return (isHospitalVendor(a.vendor) ? 0 : 1) - (isHospitalVendor(b.vendor) ? 0 : 1);
+    });
+  }
+
   function updateActiveHighlight(combo){
     const panel = combo.querySelector('.dev-combo-panel');
     panel.querySelectorAll('.dev-combo-opt').forEach(opt => {
@@ -299,16 +421,20 @@
     let html = '';
     CATEGORY_ORDER.forEach(catKey => {
       if (flat.length >= COMBO_MAX_RESULTS) return;
-      const items = allMatches.filter(d => d.category === catKey);
+      let items = allMatches.filter(d => d.category === catKey);
       if (!items.length) return;
+      items = sortForDisplay(items);
       html += `<div class="dev-combo-group">${categoryLabel(catKey)}</div>`;
       items.forEach(d => {
         if (flat.length >= COMBO_MAX_RESULTS) return;
         const idx = flat.length;
         flat.push(d);
+        const vb = vendorBadge(d.vendor);
+        const info = rightsInfo(d);
+        const stockText = (d.stock != null) ? `เหลือ ${d.stock}` : '';
         html += `<div class="dev-combo-opt" data-idx="${idx}" data-id="${d.id}" role="option">
-          <span class="dev-combo-opt-name">${escapeHtml(d.itemName)}</span>
-          <span class="dev-combo-opt-meta">${escapeHtml(codeLabel(d))} · ${escapeHtml(d.vendor)}</span>
+          <span class="dev-combo-opt-name">${escapeHtml(d.itemName)} <span class="src-badge ${vb.cls}">${vb.icon} ${escapeHtml(d.vendor)}</span></span>
+          <span class="dev-combo-opt-meta">${escapeHtml(codeLabel(d))}${info ? ' · ' + escapeHtml(info.unit) : ''}${stockText ? ' · ' + stockText : ''}</span>
         </div>`;
       });
     });
@@ -324,6 +450,36 @@
     }
     updateActiveHighlight(combo);
   }
+
+  // ---- modal ยืนยันข้ามบริษัท (default รพ. -> Emerson/Rockwood/MDC) ----
+  let _cvOnConfirm = null, _cvOnCancel = null;
+
+  function openCrossVendorModal(device, onConfirm, onCancel){
+    document.getElementById('cvText').innerHTML =
+      `กำลังเลือก <b>${escapeHtml(device.itemName)}</b> จาก <b>${escapeHtml(device.vendor)}</b> (consignment) แทนสต็อก รพ. — โปรดระบุเหตุผล`;
+    document.querySelectorAll('input[name=cvReason]').forEach(r => r.checked = false);
+    document.getElementById('cvConfirmBtn').disabled = true;
+    _cvOnConfirm = onConfirm;
+    _cvOnCancel = onCancel;
+    document.getElementById('cvOverlay').classList.add('open');
+  }
+
+  function closeCrossVendorModal(cancelled, reason){
+    document.getElementById('cvOverlay').classList.remove('open');
+    if (cancelled) { if (_cvOnCancel) _cvOnCancel(); }
+    else { if (_cvOnConfirm) _cvOnConfirm(reason); }
+    _cvOnConfirm = null; _cvOnCancel = null;
+  }
+
+  document.querySelectorAll('input[name=cvReason]').forEach(r => {
+    r.addEventListener('change', () => { document.getElementById('cvConfirmBtn').disabled = false; });
+  });
+  document.getElementById('cvCancelBtn').addEventListener('click', () => closeCrossVendorModal(true));
+  document.getElementById('cvConfirmBtn').addEventListener('click', () => {
+    const picked = document.querySelector('input[name=cvReason]:checked');
+    if (!picked) return; // validate: ต้องเลือกเหตุผลก่อนยืนยันได้
+    closeCrossVendorModal(false, picked.value);
+  });
 
   function setupDeviceCombo(it){
     const combo = it.querySelector('.dev-combo');
@@ -342,11 +498,21 @@
       const device = findDevice(select.value);
       input.value = device ? device.itemName : '';
     }
-    function pick(device){
+    function applyPick(device, reason){
       select.value = device.id;      // ค่า numeric id เดิม — โค้ดเดิมที่อ่าน .dev.value ยังทำงานเหมือนเดิม
       input.value = device.itemName;
+      if (reason) { it.dataset.crossVendorReason = reason; } else { delete it.dataset.crossVendorReason; }
+      onDeviceChange(select);        // trigger การอัปเดตรหัสเบิก/บริษัท/หน่วย/ราคา/ต้นทุนเหมือนเดิม
+    }
+    function pick(device){
       close();
-      onDeviceChange(select);        // trigger การอัปเดตรหัสเบิก/บริษัท/หน่วย/ราคาเหมือนเดิม
+      if (isHospitalVendor(device.vendor)) {
+        // ไม่ซ้ำบริษัท หรือเลือกฝั่ง รพ. (default) — เลือกจบ 1 คลิกเหมือนเดิม ไม่มี step เพิ่ม
+        applyPick(device);
+      } else {
+        // ข้ามจาก default (รพ.) ไปบริษัทอื่น — บังคับ confirm + เหตุผล เพื่อสร้าง audit trail
+        openCrossVendorModal(device, (reason) => applyPick(device, reason), () => revertToSelection());
+      }
     }
 
     input.addEventListener('focus', () => { input.select(); refresh(''); });
@@ -388,6 +554,7 @@
     clearBtn.addEventListener('click', () => {
       select.value = '';
       input.value = '';
+      delete it.dataset.crossVendorReason;
       updateItemInfo(it);
       calc();
       refresh('');
@@ -438,6 +605,7 @@
       <div>
         <label>ต้นทุนจริง/หน่วย (บาท) — ใส่ทีหลังได้</label>
         <input type="number" class="costpx" placeholder="ว่าง — consignment ยังไม่ตีราคา" min="0" onchange="calc()">
+        <div class="cost-hint" style="display:none"></div>
       </div>`;
     box.appendChild(d);
     setupDeviceCombo(d);
@@ -445,9 +613,24 @@
     calc();
   }
 
+  function updateMixedBadge(){
+    const counts = {};
+    document.querySelectorAll('.item').forEach(it => {
+      const device = findDevice(it.querySelector('.dev').value);
+      if (!device) return;
+      counts[device.vendor] = (counts[device.vendor] || 0) + 1;
+    });
+    const order = ['รพ.', 'Emerson', 'Rockwood', 'MDC'];
+    const parts = [];
+    order.forEach(v => { if (counts[v]) parts.push(`${vendorBadge(v).icon} ${v} ${counts[v]} รายการ`); });
+    Object.keys(counts).forEach(v => { if (!order.includes(v) && counts[v]) parts.push(`${vendorBadge(v).icon} ${v} ${counts[v]} รายการ`); });
+    const el = document.getElementById('mixedBadge');
+    el.textContent = parts.length ? `เคสนี้: ${parts.join('  +  ')}` : 'เคสนี้: ยังไม่มีรายการ';
+  }
+
   function calc(){
     const right = document.getElementById('right').value;
-    let tClaim = 0, tCost = 0, anyWarn = false;
+    let tClaim = 0, tCost = 0, tClaimHosp = 0, tClaimOther = 0, anyWarn = false;
     document.querySelectorAll('.item').forEach(it => {
       const device = findDevice(it.querySelector('.dev').value);
       const qty = +(it.querySelector('.qty').value || 0);
@@ -465,16 +648,22 @@
         line.value = '—'; anyWarn = true;
       } else {
         cp.value = fmt(p); cp.style.color = '';
-        line.value = fmt(p * qty); tClaim += p * qty;
+        const lineTotal = p * qty;
+        line.value = fmt(lineTotal); tClaim += lineTotal;
+        // ยอดรวมแยก 2 ก้อนตามบริษัท (นับตาม vendor: รพ. = สต็อก, อื่น = consignment) — ไม่ปนเงินกัน
+        if (isHospitalVendor(device.vendor)) tClaimHosp += lineTotal; else tClaimOther += lineTotal;
       }
       if (cost > 0) tCost += cost * qty;
     });
     document.getElementById('tClaim').textContent = fmt(tClaim);
+    document.getElementById('tClaimHosp').textContent = fmt(tClaimHosp);
+    document.getElementById('tClaimOther').textContent = fmt(tClaimOther);
     document.getElementById('tCost').textContent = fmt(tCost);
     const v = document.getElementById('tVar');
     v.textContent = (tCost ? (tClaim - tCost >= 0 ? '+' : '') + fmt(tClaim - tCost) : 'รอต้นทุน');
     v.style.color = (tCost && tClaim < tCost) ? '#b91c1c' : '';
     document.getElementById('nowarn').style.display = anyWarn ? 'block' : 'none';
+    updateMixedBadge();
   }
 
   function submitForm(){
@@ -492,11 +681,15 @@
       const cost = it.querySelector('.costpx').value || '(ว่าง)';
       const p = getPrice(device, right);
       const info = rightsInfo(device);
-      return `  • ${codeLabel(device)} ${device.itemName} (${device.vendor}) — ${q} ${info ? info.unit : ''} — เบิก ${p != null ? fmt(p*q) : '⚠️ไม่มีราคา'} — ต้นทุน ${cost}`;
+      const reasonTag = it.dataset.crossVendorReason ? ` [เหตุผลข้ามบริษัท: ${it.dataset.crossVendorReason}]` : '';
+      return `  • ${codeLabel(device)} ${device.itemName} (${vendorBadge(device.vendor).icon} ${device.vendor}) — ${q} ${info ? info.unit : ''} — เบิก ${p != null ? fmt(p*q) : '⚠️ไม่มีราคา'} — ต้นทุน ${cost}${reasonTag}`;
     });
-    alert(`✅ บันทึกแล้ว (demo)\nHN: ${hn}\nสิทธิ: ${right}\n${rows.join('\n')}\n\nยอดเบิก: ${fmt(+document.getElementById('tClaim').textContent.replace(/,/g,''))} บาท` +
+    alert(`✅ บันทึกแล้ว (demo)\nHN: ${hn}\nสิทธิ: ${right}\n${rows.join('\n')}\n\n` +
+      `ยอดรวม (🏥 รพ.): ${document.getElementById('tClaimHosp').textContent} บาท\n` +
+      `ยอดรวม (📦 Emerson + อื่น): ${document.getElementById('tClaimOther').textContent} บาท\n` +
+      `ยอดรวมทั้งใบ (claim, อ้างอิงสิทธิ์เท่านั้น): ${document.getElementById('tClaim').textContent} บาท` +
       (anyBlocked ? `\n\n⚠️ มีรายการที่ไม่มีราคาเบิกในสิทธินี้ — ระบบ flag ส่งการเงินตรวจสอบ ไม่พิมพ์ใบเบิกรายการนั้น` : '') +
-      `\n(ในระบบจริง: snapshot ราคา + flag ส่งคลัง/การเงิน)`);
+      `\n(ในระบบจริง: snapshot บริษัท+รหัส+ราคา+เหตุผลข้ามบริษัท ต่อรายการ แล้วแยก flag ไปคลัง/การเงินตามบริษัท)`);
   }
 
   // init
