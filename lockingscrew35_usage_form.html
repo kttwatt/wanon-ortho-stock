@@ -53,6 +53,35 @@
     min-height: 14px;
   }
   footer { margin-top: 16px; text-align: center; font-size: 12px; color: #94a3b8; }
+
+  /* ---- searchable combobox (ชนิดอุปกรณ์) ---- */
+  .dev-combo { position: relative; }
+  .dev-combo-inputwrap { position: relative; }
+  .dev-combo-input { padding-right: 34px; }
+  .dev-combo-clear {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    background: #e2e8f0; color: #64748b; border: none; border-radius: 6px;
+    width: 23px; height: 23px; font-size: 12px; line-height: 1; cursor: pointer;
+  }
+  .dev-combo-clear:hover { background: #cbd5e1; color: #334155; }
+  .dev-combo-panel {
+    position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px);
+    background: #fff; border: 1px solid #cbd5e1; border-radius: 10px;
+    box-shadow: 0 10px 26px rgba(15,23,42,.14);
+    max-height: 260px; overflow-y: auto; display: none;
+  }
+  .dev-combo-panel.open { display: block; }
+  .dev-combo-group {
+    position: sticky; top: 0; background: #f0fdfa; color: #0f766e;
+    font-size: 11.5px; font-weight: 700; padding: 5px 10px;
+    border-bottom: 1px solid #ccfbf1;
+  }
+  .dev-combo-opt { padding: 7px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 1px; }
+  .dev-combo-opt-name { font-size: 13.5px; color: #1e293b; }
+  .dev-combo-opt-meta { font-size: 11px; color: #64748b; }
+  .dev-combo-opt:hover, .dev-combo-opt.active { background: #f0fdfa; }
+  .dev-combo-opt.active .dev-combo-opt-name { color: #0f766e; font-weight: 700; }
+  .dev-combo-empty, .dev-combo-more { padding: 10px; font-size: 12.5px; color: #64748b; text-align: center; }
 </style>
 </head>
 <body>
@@ -211,15 +240,159 @@
 
   function updateItemInfo(it){
     const device = findDevice(it.querySelector('.dev').value);
-    it.querySelector('.vendorhint').textContent = device.vendor;
-    it.querySelector('.code').value = codeLabel(device);
-    it.querySelector('.unitlabel').textContent = rightsInfo(device) ? rightsInfo(device).unit : '-';
+    const vendorhint = it.querySelector('.vendorhint');
+    const codeInput = it.querySelector('.code');
+    const unitlabel = it.querySelector('.unitlabel');
+    if (!device) {
+      vendorhint.textContent = '— ยังไม่ได้เลือกอุปกรณ์ —';
+      codeInput.value = '';
+      unitlabel.textContent = '-';
+      return;
+    }
+    vendorhint.textContent = device.vendor;
+    codeInput.value = codeLabel(device);
+    unitlabel.textContent = rightsInfo(device) ? rightsInfo(device).unit : '-';
   }
 
   function onDeviceChange(sel){
     const it = sel.closest('.item');
     updateItemInfo(it);
     calc();
+  }
+
+  // ---- searchable combobox (ชนิดอุปกรณ์) ----
+  // ค้นในทั้งรายการ DEVICES (รองรับหลักพันรายการ) ตามชื่อ/รหัส/หมวด/บริษัท
+  const COMBO_MAX_RESULTS = 400;
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+
+  function categoryLabel(catKey){
+    const c = CATEGORIES[catKey];
+    return c ? `${c.icon} ${c.label}` : catKey;
+  }
+
+  function deviceSearchText(d){
+    return `${d.itemName} ${codeLabel(d)} ${categoryLabel(d.category)} ${d.vendor}`.toLowerCase();
+  }
+
+  function filterDevices(query){
+    const q = query.trim().toLowerCase();
+    if (!q) return DEVICES;
+    return DEVICES.filter(d => deviceSearchText(d).includes(q));
+  }
+
+  function updateActiveHighlight(combo){
+    const panel = combo.querySelector('.dev-combo-panel');
+    panel.querySelectorAll('.dev-combo-opt').forEach(opt => {
+      const isActive = Number(opt.dataset.idx) === combo._activeIndex;
+      opt.classList.toggle('active', isActive);
+      if (isActive) opt.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  function renderComboResults(combo, query){
+    const panel = combo.querySelector('.dev-combo-panel');
+    const allMatches = filterDevices(query);
+    const flat = [];
+    let html = '';
+    CATEGORY_ORDER.forEach(catKey => {
+      if (flat.length >= COMBO_MAX_RESULTS) return;
+      const items = allMatches.filter(d => d.category === catKey);
+      if (!items.length) return;
+      html += `<div class="dev-combo-group">${categoryLabel(catKey)}</div>`;
+      items.forEach(d => {
+        if (flat.length >= COMBO_MAX_RESULTS) return;
+        const idx = flat.length;
+        flat.push(d);
+        html += `<div class="dev-combo-opt" data-idx="${idx}" data-id="${d.id}" role="option">
+          <span class="dev-combo-opt-name">${escapeHtml(d.itemName)}</span>
+          <span class="dev-combo-opt-meta">${escapeHtml(codeLabel(d))} · ${escapeHtml(d.vendor)}</span>
+        </div>`;
+      });
+    });
+    combo._flatList = flat;
+    combo._activeIndex = flat.length ? 0 : -1;
+    if (!flat.length) {
+      panel.innerHTML = `<div class="dev-combo-empty">ไม่พบอุปกรณ์ที่ตรงกับ "${escapeHtml(query)}"</div>`;
+    } else {
+      if (allMatches.length > flat.length) {
+        html += `<div class="dev-combo-more">พบทั้งหมด ${allMatches.length} รายการ — แสดง ${flat.length} รายการแรก พิมพ์เพิ่มเติมเพื่อกรองให้แคบลง</div>`;
+      }
+      panel.innerHTML = html;
+    }
+    updateActiveHighlight(combo);
+  }
+
+  function setupDeviceCombo(it){
+    const combo = it.querySelector('.dev-combo');
+    const input = combo.querySelector('.dev-combo-input');
+    const clearBtn = combo.querySelector('.dev-combo-clear');
+    const panel = combo.querySelector('.dev-combo-panel');
+    const select = it.querySelector('.dev');
+
+    const currentDevice = findDevice(select.value);
+    input.value = currentDevice ? currentDevice.itemName : '';
+
+    function open(){ panel.classList.add('open'); input.setAttribute('aria-expanded', 'true'); }
+    function close(){ panel.classList.remove('open'); input.setAttribute('aria-expanded', 'false'); }
+    function refresh(query){ renderComboResults(combo, query); open(); }
+    function revertToSelection(){
+      const device = findDevice(select.value);
+      input.value = device ? device.itemName : '';
+    }
+    function pick(device){
+      select.value = device.id;      // ค่า numeric id เดิม — โค้ดเดิมที่อ่าน .dev.value ยังทำงานเหมือนเดิม
+      input.value = device.itemName;
+      close();
+      onDeviceChange(select);        // trigger การอัปเดตรหัสเบิก/บริษัท/หน่วย/ราคาเหมือนเดิม
+    }
+
+    input.addEventListener('focus', () => { input.select(); refresh(''); });
+    input.addEventListener('input', () => { refresh(input.value); });
+
+    input.addEventListener('keydown', (e) => {
+      const flat = combo._flatList || [];
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (!panel.classList.contains('open')) { refresh(input.value); return; }
+        if (flat.length) { combo._activeIndex = Math.min((combo._activeIndex ?? -1) + 1, flat.length - 1); updateActiveHighlight(combo); }
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (flat.length) { combo._activeIndex = Math.max((combo._activeIndex ?? 0) - 1, 0); updateActiveHighlight(combo); }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (panel.classList.contains('open') && flat.length && combo._activeIndex >= 0) {
+          pick(flat[combo._activeIndex]);
+        }
+      } else if (e.key === 'Escape') {
+        close();
+        revertToSelection();
+      }
+    });
+
+    panel.addEventListener('mousedown', (e) => {
+      const opt = e.target.closest('.dev-combo-opt');
+      if (!opt) return;
+      e.preventDefault(); // กัน input เสีย focus ก่อน click จะทำงาน
+      const device = findDevice(opt.dataset.id);
+      if (device) pick(device);
+    });
+
+    input.addEventListener('blur', () => {
+      setTimeout(() => { close(); revertToSelection(); }, 120);
+    });
+
+    clearBtn.addEventListener('mousedown', (e) => e.preventDefault()); // กัน input เสีย focus ก่อน click จะทำงาน (ไม่งั้น blur timer จะปิด panel ที่เพิ่งเปิดใหม่)
+    clearBtn.addEventListener('click', () => {
+      select.value = '';
+      input.value = '';
+      updateItemInfo(it);
+      calc();
+      refresh('');
+      input.focus();
+    });
   }
 
   function addItem(deviceId){
@@ -230,7 +403,14 @@
     d.innerHTML = `
       <button class="del" onclick="this.closest('.item').remove(); calc();">✕</button>
       <label>ชนิดอุปกรณ์</label>
-      <select class="dev" onchange="onDeviceChange(this)">
+      <div class="dev-combo">
+        <div class="dev-combo-inputwrap">
+          <input type="text" class="dev-combo-input" placeholder="พิมพ์ชื่อ / รหัส / ชนิด เพื่อค้นหา..." autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false">
+          <button type="button" class="dev-combo-clear" title="ล้างค่า">✕</button>
+        </div>
+        <div class="dev-combo-panel" role="listbox"></div>
+      </div>
+      <select class="dev" style="display:none" onchange="onDeviceChange(this)">
         ${deviceOptionsHTML(deviceId)}
       </select>
       <label>บริษัท / รพ.</label>
@@ -260,6 +440,7 @@
         <input type="number" class="costpx" placeholder="ว่าง — consignment ยังไม่ตีราคา" min="0" onchange="calc()">
       </div>`;
     box.appendChild(d);
+    setupDeviceCombo(d);
     updateItemInfo(d);
     calc();
   }
@@ -273,6 +454,11 @@
       const cp = it.querySelector('.claimpx');
       const line = it.querySelector('.lineclaim');
       const cost = +(it.querySelector('.costpx').value || 0);
+      if (!device) {
+        cp.value = '—'; cp.style.color = '';
+        line.value = '—';
+        return;
+      }
       const p = getPrice(device, right);
       if (p === null) {
         cp.value = '⚠️ ไม่มีราคา'; cp.style.color = '#b45309';
@@ -296,6 +482,8 @@
     if(!hn){ alert('กรุณากรอก HN / ชื่อผู้ป่วย'); return; }
     const items = document.querySelectorAll('.item');
     if(!items.length){ alert('ยังไม่มีรายการอุปกรณ์'); return; }
+    const missingDevice = [...items].some(it => !findDevice(it.querySelector('.dev').value));
+    if(missingDevice){ alert('กรุณาเลือกอุปกรณ์ให้ครบทุกรายการ (มีช่องที่ยังไม่ได้เลือก)'); return; }
     const right = document.getElementById('right').value;
     const anyBlocked = [...items].some(it => getPrice(findDevice(it.querySelector('.dev').value), right) === null);
     const rows = [...items].map(it => {
