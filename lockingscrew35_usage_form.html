@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>บันทึกการใช้อุปกรณ์ — ศัลยกรรมกระดูก (v5)</title>
+<title>บันทึกการใช้อุปกรณ์ — ศัลยกรรมกระดูก (v6)</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: "Noto Sans Thai", "Sarabun", system-ui, sans-serif; background: #f2f4f8; color: #1e293b; padding: 20px; }
@@ -110,6 +110,54 @@
   .dev-combo-opt.active .dev-combo-opt-name { color: #0f766e; font-weight: 700; }
   .dev-combo-empty, .dev-combo-more { padding: 10px; font-size: 12.5px; color: #64748b; text-align: center; }
 
+  /* ---- matrix view (ขนาด × บริษัท) — สลับอัตโนมัติเมื่อผลลัพธ์ค้นหาเยอะ (หัวข้อ 10) ---- */
+  .dev-combo-panel.mx-mode { padding: 0; max-height: 360px; }
+  .mx-wrap { max-height: 360px; overflow: auto; }
+  .mx-toolbar {
+    position: sticky; top: 0; z-index: 8; background: #f0fdfa;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 10px; border-bottom: 1px solid #ccfbf1; gap: 8px;
+  }
+  .mx-title { font-size: 11.5px; font-weight: 700; color: #0f766e; }
+  .mx-close {
+    background: #fff; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px;
+    width: 26px; height: 26px; font-size: 13px; cursor: pointer; flex-shrink: 0;
+  }
+  .mx-close:hover { background: #f1f5f9; }
+  table.mx-table { border-collapse: separate; border-spacing: 0; width: max-content; min-width: 100%; }
+  .mx-table th, .mx-table td { border-bottom: 1px solid #eef2f6; padding: 0; }
+  .mx-table thead th {
+    position: sticky; top: 34px; background: #f8fafc; color: #334155;
+    font-size: 11.5px; font-weight: 700; padding: 7px 8px; white-space: nowrap; z-index: 5;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  td.mx-col-size, th.mx-col-size {
+    position: sticky; left: 0; z-index: 4; background: #fff;
+    font-size: 15px; font-weight: 800; color: #1e293b;
+    padding: 9px 12px; text-align: left; white-space: nowrap;
+    border-right: 1px solid #e2e8f0; min-width: 86px;
+  }
+  th.mx-col-size { z-index: 9; background: #f8fafc; }
+  td.mx-col-hosp, th.mx-col-hosp {
+    position: sticky; left: 86px; z-index: 3; background: #f0fdf4;
+    border-right: 2px solid #bbf7d0;
+  }
+  th.mx-col-hosp { z-index: 9; background: #ecfdf5; }
+  tr.mx-row5 td, tr.mx-row5 th.mx-col-size { border-bottom: 2px solid #94a3b8; }
+  .mx-cellbtn {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; min-width: 68px; min-height: 44px; border: none; background: transparent;
+    font-size: 13.5px; font-weight: 700; color: #0f766e; cursor: pointer;
+  }
+  .mx-cellbtn:hover { background: #f0fdfa; }
+  .mx-cellbtn.mx-low { color: #b45309; }
+  .mx-cellbtn.mx-low:hover { background: #fff7ed; }
+  .mx-empty {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 44px; min-width: 68px; color: #cbd5e1; font-size: 13px;
+  }
+  .mx-legend { font-size: 11px; color: #64748b; padding: 7px 10px; border-top: 1px solid #eef2f6; background: #fff; }
+
   /* ---- modal ยืนยันข้ามบริษัท (default รพ. -> อื่น) ---- */
   .cv-modal-overlay {
     position: fixed; inset: 0; background: rgba(15,23,42,.5);
@@ -130,7 +178,7 @@
 <div class="wrap">
   <header>
     <h1>📋 บันทึกการใช้อุปกรณ์ — ศัลยกรรมกระดูก</h1>
-    <p>รวมรายการอุปกรณ์ทั้งหมดจากหน้าจับคู่รหัสสิทธิ์ (26 รายการ) · demo — ยังไม่เชื่อมฐานข้อมูลจริง</p>
+    <p>รวมรายการอุปกรณ์ทั้งหมดจากหน้าจับคู่รหัสสิทธิ์ · demo — ยังไม่เชื่อมฐานข้อมูลจริง · v6 เพิ่ม Matrix view (ขนาด × บริษัท) เมื่อผลค้นหาเยอะ</p>
     <div class="mixed-badge" id="mixedBadge">เคสนี้: ยังไม่มีรายการ</div>
     <nav class="pagenav">
       <a href="lockingscrew35_usage_form.html" class="current">📋 บันทึกการใช้อุปกรณ์</a>
@@ -239,7 +287,36 @@
     // ---- รายการที่ "ซ้ำบริษัท" (โจทย์หัวข้อ 3) และรายการที่ รพ. ไม่มีสต็อกเอง (โจทย์หัวข้อ 8) ----
     { id: 11, category: 'screw-cortex', itemName: 'Cortex screw 3.5×24mm', vendor: 'Emerson', code: '7302', variant: '', clinicalKey: 'cortex-3.5x24', stock: 15, cost: null },
     { id: 12, category: 'screw-locking', itemName: 'Self Tapping Locking screw 3.5×28mm', vendor: 'Emerson', code: '7301', variant: '', clinicalKey: 'lock-3.5x28', stock: 20, cost: null },
-    { id: 13, category: 'plate', itemName: 'Locking plate รุ่น X (Distal Femur)', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'plate-x', stock: 5, cost: null }
+    { id: 13, category: 'plate', itemName: 'Locking plate รุ่น X (Distal Femur)', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'plate-x', stock: 5, cost: null },
+    // ---- Cortex screw 3.5mm ขยายเต็มช่วงขนาด × หลายบริษัท (โจทย์หัวข้อ 10 — ทดสอบ matrix view) ----
+    // ตั้งใจให้บางขนาดไม่มีของบางบริษัทเลย (แสดง —) และบางขนาดฝั่ง รพ. ใกล้หมด (แสดง 🟡) เพื่อครบทั้ง 3 สถานะของ cell
+    { id: 300, category: 'screw-cortex', itemName: 'Cortex screw 3.5×18mm', vendor: 'Emerson', code: '7302', variant: '', clinicalKey: 'cortex-3.5x18', stock: 6, cost: null },
+    { id: 301, category: 'screw-cortex', itemName: 'Cortex screw 3.5×20mm', vendor: 'รพ.', code: '7302', variant: '', clinicalKey: 'cortex-3.5x20', stock: 30, cost: 180 },
+    { id: 302, category: 'screw-cortex', itemName: 'Cortex screw 3.5×20mm', vendor: 'Emerson', code: '7302', variant: '', clinicalKey: 'cortex-3.5x20', stock: 12, cost: null },
+    { id: 303, category: 'screw-cortex', itemName: 'Cortex screw 3.5×22mm', vendor: 'รพ.', code: '7302', variant: '', clinicalKey: 'cortex-3.5x22', stock: 25, cost: 182 },
+    { id: 304, category: 'screw-cortex', itemName: 'Cortex screw 3.5×22mm', vendor: 'Emerson', code: '7302', variant: '', clinicalKey: 'cortex-3.5x22', stock: 9, cost: null },
+    { id: 305, category: 'screw-cortex', itemName: 'Cortex screw 3.5×22mm', vendor: 'Rockwood', code: '7302', variant: '', clinicalKey: 'cortex-3.5x22', stock: 4, cost: null },
+    { id: 306, category: 'screw-cortex', itemName: 'Cortex screw 3.5×24mm', vendor: 'MDC', code: '7302', variant: '', clinicalKey: 'cortex-3.5x24', stock: 4, cost: null },
+    { id: 307, category: 'screw-cortex', itemName: 'Cortex screw 3.5×26mm', vendor: 'รพ.', code: '7302', variant: '', clinicalKey: 'cortex-3.5x26', stock: 2, cost: 185 },
+    { id: 308, category: 'screw-cortex', itemName: 'Cortex screw 3.5×26mm', vendor: 'Emerson', code: '7302', variant: '', clinicalKey: 'cortex-3.5x26', stock: 20, cost: null },
+    { id: 309, category: 'screw-cortex', itemName: 'Cortex screw 3.5×26mm', vendor: 'Rockwood', code: '7302', variant: '', clinicalKey: 'cortex-3.5x26', stock: 6, cost: null },
+    { id: 310, category: 'screw-cortex', itemName: 'Cortex screw 3.5×28mm', vendor: 'Emerson', code: '7302', variant: '', clinicalKey: 'cortex-3.5x28', stock: 18, cost: null },
+    { id: 311, category: 'screw-cortex', itemName: 'Cortex screw 3.5×28mm', vendor: 'MDC', code: '7302', variant: '', clinicalKey: 'cortex-3.5x28', stock: 5, cost: null },
+    { id: 312, category: 'screw-cortex', itemName: 'Cortex screw 3.5×30mm', vendor: 'รพ.', code: '7302', variant: '', clinicalKey: 'cortex-3.5x30', stock: 8, cost: 190 },
+    { id: 313, category: 'screw-cortex', itemName: 'Cortex screw 3.5×30mm', vendor: 'Emerson', code: '7302', variant: '', clinicalKey: 'cortex-3.5x30', stock: 11, cost: null },
+    { id: 314, category: 'screw-cortex', itemName: 'Cortex screw 3.5×32mm', vendor: 'รพ.', code: '7302', variant: '', clinicalKey: 'cortex-3.5x32', stock: 18, cost: 195 },
+    { id: 315, category: 'screw-cortex', itemName: 'Cortex screw 3.5×32mm', vendor: 'Rockwood', code: '7302', variant: '', clinicalKey: 'cortex-3.5x32', stock: 3, cost: null },
+    { id: 316, category: 'screw-cortex', itemName: 'Cortex screw 3.5×34mm', vendor: 'Emerson', code: '7302', variant: '', clinicalKey: 'cortex-3.5x34', stock: 7, cost: null },
+    { id: 317, category: 'screw-cortex', itemName: 'Cortex screw 3.5×36mm', vendor: 'รพ.', code: '7302', variant: '', clinicalKey: 'cortex-3.5x36', stock: 14, cost: 200 },
+    { id: 318, category: 'screw-cortex', itemName: 'Cortex screw 3.5×36mm', vendor: 'Emerson', code: '7302', variant: '', clinicalKey: 'cortex-3.5x36', stock: 5, cost: null },
+    { id: 319, category: 'screw-cortex', itemName: 'Cortex screw 3.5×36mm', vendor: 'MDC', code: '7302', variant: '', clinicalKey: 'cortex-3.5x36', stock: 2, cost: null },
+    { id: 320, category: 'screw-cortex', itemName: 'Cortex screw 3.5×38mm', vendor: 'รพ.', code: '7302', variant: '', clinicalKey: 'cortex-3.5x38', stock: 1, cost: 205 },
+    { id: 321, category: 'screw-cortex', itemName: 'Cortex screw 3.5×38mm', vendor: 'Emerson', code: '7302', variant: '', clinicalKey: 'cortex-3.5x38', stock: 9, cost: null },
+    { id: 322, category: 'screw-cortex', itemName: 'Cortex screw 3.5×40mm', vendor: 'รพ.', code: '7302', variant: '', clinicalKey: 'cortex-3.5x40', stock: 20, cost: 210 },
+    { id: 323, category: 'screw-cortex', itemName: 'Cortex screw 3.5×45mm', vendor: 'Emerson', code: '7302', variant: '', clinicalKey: 'cortex-3.5x45', stock: 4, cost: null },
+    { id: 324, category: 'screw-cortex', itemName: 'Cortex screw 3.5×45mm', vendor: 'Rockwood', code: '7302', variant: '', clinicalKey: 'cortex-3.5x45', stock: 2, cost: null },
+    { id: 325, category: 'screw-cortex', itemName: 'Cortex screw 3.5×50mm', vendor: 'รพ.', code: '7302', variant: '', clinicalKey: 'cortex-3.5x50', stock: 6, cost: 215 },
+    { id: 326, category: 'screw-cortex', itemName: 'Cortex screw 3.5×50mm', vendor: 'MDC', code: '7302', variant: '', clinicalKey: 'cortex-3.5x50', stock: 3, cost: null }
   ];
 
   const CATEGORY_ORDER = ['screw-cortex', 'screw-locking', 'cannulated', 'kwire', 'plate', 'wire'];
@@ -370,6 +447,10 @@
   // ---- searchable combobox (ชนิดอุปกรณ์) ----
   // ค้นในทั้งรายการ DEVICES (รองรับหลักพันรายการ) ตามชื่อ/รหัส/หมวด/บริษัท
   const COMBO_MAX_RESULTS = 400;
+  // หัวข้อ 10: จำนวนแถวผลลัพธ์ที่มากกว่านี้ (ขนาด × บริษัทที่ match) จะสลับจาก flat list เป็น Matrix view อัตโนมัติ — ปรับได้ทีหลังจากข้อมูลจริง
+  const MATRIX_ROW_THRESHOLD = 8;
+  // เกณฑ์ "สต็อก รพ. ใกล้หมด" ในเซลล์ matrix (🟡) — เฉพาะฝั่ง รพ. เท่านั้น (ดูหัวข้อ 10.4/10.5), ปรับได้ทีหลัง
+  const LOW_STOCK_THRESHOLD = 2;
 
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
@@ -384,10 +465,16 @@
     return `${d.itemName} ${codeLabel(d)} ${categoryLabel(d.category)} ${d.vendor}`.toLowerCase();
   }
 
+  // รองรับพิมพ์ต่อหลายคำ (เช่น "cortex 26") — ทุกคำต้องพบใน search text ของอุปกรณ์นั้น
+  // คำเดียวยังทำงานเหมือนเดิมทุกประการ — ใช้กรองแถวต่อในหน้า matrix ได้ (หัวข้อ 10.5)
   function filterDevices(query){
     const q = query.trim().toLowerCase();
     if (!q) return DEVICES;
-    return DEVICES.filter(d => deviceSearchText(d).includes(q));
+    const terms = q.split(/\s+/).filter(Boolean);
+    return DEVICES.filter(d => {
+      const text = deviceSearchText(d);
+      return terms.every(t => text.includes(t));
+    });
   }
 
   // จัดกลุ่มรายการที่ clinicalKey เดียวกัน (อุปกรณ์เดียวกันคนละบริษัท) ให้อยู่ติดกัน
@@ -414,9 +501,102 @@
     });
   }
 
+  // ---- Matrix view (ขนาด × บริษัท) — หัวข้อ 10 ----
+  // ตัดคำนำหน้าชื่ออุปกรณ์ (ชื่อรุ่น) ออกจาก itemName ให้เหลือแต่ "ขนาด" สำหรับโชว์เป็น label แถว
+  const MX_FAMILY_PREFIX = {
+    'screw-cortex':  'Cortex screw',
+    'screw-locking': 'Self Tapping Locking screw',
+    'cannulated':    'Cannulated Locking screw',
+    'kwire':         'K-wire',
+    'wire':          'Cerclage wire'
+  };
+  function sizeLabelFor(d){
+    const prefix = MX_FAMILY_PREFIX[d.category];
+    let label = d.itemName;
+    if (prefix && label.startsWith(prefix)) label = label.slice(prefix.length).trim();
+    return label.replace(/mm$/i, '');
+  }
+
+  const MX_VENDOR_ORDER = ['รพ.', 'Emerson', 'Rockwood', 'MDC'];
+
+  // แปลงผลค้นหาแบบแบน (allMatches) ให้เป็นโครง matrix: rows = ขนาด (clinicalKey), cols = บริษัทที่พบจริงในผลค้นหานี้
+  function buildMatrixModel(matches){
+    const rowOrder = [];
+    const rowMap = {};
+    matches.forEach(d => {
+      const key = d.clinicalKey || d.itemName;
+      if (!(key in rowMap)) {
+        rowMap[key] = { key, label: sizeLabelFor(d), cells: {} };
+        rowOrder.push(key);
+      }
+      rowMap[key].cells[d.vendor] = d;
+    });
+    const seenVendors = [];
+    matches.forEach(d => { if (!seenVendors.includes(d.vendor)) seenVendors.push(d.vendor); });
+    const cols = MX_VENDOR_ORDER.filter(v => seenVendors.includes(v))
+      .concat(seenVendors.filter(v => !MX_VENDOR_ORDER.includes(v)));
+    return { rows: rowOrder.map(k => rowMap[k]), cols };
+  }
+
+  function matrixCellHTML(device){
+    if (!device) return `<span class="mx-empty">—</span>`;
+    const isHosp = isHospitalVendor(device.vendor);
+    const stock = device.stock;
+    const low = isHosp && stock != null && stock <= LOW_STOCK_THRESHOLD;
+    const icon = low ? '🟡' : '●';
+    const cls = low ? 'mx-cellbtn mx-low' : 'mx-cellbtn';
+    return `<button type="button" class="${cls}" data-id="${device.id}" title="${escapeHtml(device.itemName)} · ${escapeHtml(device.vendor)}">${icon} ${stock != null ? stock : ''}</button>`;
+  }
+
+  function renderMatrixInto(panel, matches){
+    panel.classList.add('mx-mode');
+    const { rows, cols } = buildMatrixModel(matches);
+    let html = `<div class="mx-wrap">
+      <div class="mx-toolbar">
+        <span class="mx-title">⊞ ขนาด × บริษัท — พบ ${matches.length} รายการ · พิมพ์ต่อในช่องค้นหาด้านบนเพื่อกรองแถว</span>
+        <button type="button" class="mx-close" data-mx-close title="ปิด กลับไปแบบลิสต์">✕</button>
+      </div>
+      <table class="mx-table">
+        <thead><tr>
+          <th class="mx-col-size">ขนาด</th>
+          ${cols.map(v => {
+            const vb = vendorBadge(v);
+            const isHosp = v === 'รพ.';
+            return `<th${isHosp ? ' class="mx-col-hosp"' : ''}>${vb.icon} ${escapeHtml(v)}</th>`;
+          }).join('')}
+        </tr></thead>
+        <tbody>`;
+    rows.forEach((row, i) => {
+      const row5 = ((i + 1) % 5 === 0) ? ' class="mx-row5"' : '';
+      html += `<tr${row5}>
+        <td class="mx-col-size">${escapeHtml(row.label)}</td>
+        ${cols.map(v => {
+          const isHosp = v === 'รพ.';
+          return `<td${isHosp ? ' class="mx-col-hosp"' : ''}>${matrixCellHTML(row.cells[v])}</td>`;
+        }).join('')}
+      </tr>`;
+    });
+    html += `</tbody></table>
+      <div class="mx-legend">● = มีสต็อก (เลขคือจำนวนคงเหลือ) · — = ไม่มีของบริษัทนี้ขนาดนี้ · 🟡 = สต็อก รพ. ใกล้หมด (≤ ${LOW_STOCK_THRESHOLD}) · คลิกจุด ● / 🟡 = เลือกขนาด+บริษัททันที</div>
+    </div>`;
+    panel.innerHTML = html;
+  }
+
   function renderComboResults(combo, query){
     const panel = combo.querySelector('.dev-combo-panel');
     const allMatches = filterDevices(query);
+
+    // หัวข้อ 10.3: สลับเป็น matrix อัตโนมัติเฉพาะตอน "พิมพ์ค้นหา" (query ไม่ว่าง) แล้วจำนวนแถวเกิน threshold
+    // และผู้ใช้ยังไม่ได้กด ✕ ปิด matrix ของผลค้นหาปัจจุบันทิ้งไป
+    const useMatrix = query.trim() !== '' && allMatches.length > MATRIX_ROW_THRESHOLD && !combo._matrixClosed;
+    if (useMatrix) {
+      renderMatrixInto(panel, allMatches);
+      combo._flatList = [];
+      combo._activeIndex = -1;
+      return;
+    }
+
+    panel.classList.remove('mx-mode');
     const flat = [];
     let html = '';
     CATEGORY_ORDER.forEach(catKey => {
@@ -490,6 +670,7 @@
 
     const currentDevice = findDevice(select.value);
     input.value = currentDevice ? currentDevice.itemName : '';
+    combo._matrixClosed = false;
 
     function open(){ panel.classList.add('open'); input.setAttribute('aria-expanded', 'true'); }
     function close(){ panel.classList.remove('open'); input.setAttribute('aria-expanded', 'false'); }
@@ -506,17 +687,18 @@
     }
     function pick(device){
       close();
+      combo._matrixClosed = false;
       if (isHospitalVendor(device.vendor)) {
-        // ไม่ซ้ำบริษัท หรือเลือกฝั่ง รพ. (default) — เลือกจบ 1 คลิกเหมือนเดิม ไม่มี step เพิ่ม
+        // ไม่ซ้ำบริษัท หรือเลือกฝั่ง รพ. (default) — เลือกจบ 1 คลิกเหมือนเดิม ไม่มี step เพิ่ม (จาก flat list หรือ matrix ก็ทำงานเหมือนกัน)
         applyPick(device);
       } else {
-        // ข้ามจาก default (รพ.) ไปบริษัทอื่น — บังคับ confirm + เหตุผล เพื่อสร้าง audit trail
+        // ข้ามจาก default (รพ.) ไปบริษัทอื่น — บังคับ confirm + เหตุผล เพื่อสร้าง audit trail (เหมือนกันทั้ง flat list และ matrix)
         openCrossVendorModal(device, (reason) => applyPick(device, reason), () => revertToSelection());
       }
     }
 
-    input.addEventListener('focus', () => { input.select(); refresh(''); });
-    input.addEventListener('input', () => { refresh(input.value); });
+    input.addEventListener('focus', () => { input.select(); combo._matrixClosed = false; refresh(''); });
+    input.addEventListener('input', () => { combo._matrixClosed = false; refresh(input.value); });
 
     input.addEventListener('keydown', (e) => {
       const flat = combo._flatList || [];
@@ -539,6 +721,20 @@
     });
 
     panel.addEventListener('mousedown', (e) => {
+      const closeBtn = e.target.closest('[data-mx-close]');
+      if (closeBtn) {
+        e.preventDefault(); // กัน input เสีย focus ก่อน click จะทำงาน
+        combo._matrixClosed = true;
+        renderComboResults(combo, input.value);
+        return;
+      }
+      const cellBtn = e.target.closest('.mx-cellbtn');
+      if (cellBtn) {
+        e.preventDefault();
+        const device = findDevice(cellBtn.dataset.id);
+        if (device) pick(device);
+        return;
+      }
       const opt = e.target.closest('.dev-combo-opt');
       if (!opt) return;
       e.preventDefault(); // กัน input เสีย focus ก่อน click จะทำงาน
@@ -555,6 +751,7 @@
       select.value = '';
       input.value = '';
       delete it.dataset.crossVendorReason;
+      combo._matrixClosed = false;
       updateItemInfo(it);
       calc();
       refresh('');
