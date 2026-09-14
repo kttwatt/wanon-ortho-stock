@@ -281,10 +281,18 @@
   .um-body { padding: 12px 18px; overflow-y: auto; font-size: 13px; }
   .um-body.done { color: #0f766e; font-weight: 600; text-align: center; padding: 24px; }
   .um-item { display: flex; justify-content: space-between; gap: 10px; padding: 7px 6px;
-    border-bottom: 1px dashed #f3f4f6; align-items: baseline; }
+    border-bottom: 1px dashed #f3f4f6; align-items: center; cursor: pointer;
+    width: 100%; text-align: left; background: none; border-left: none; border-right: none;
+    border-top: none; border-bottom: 1px dashed #f3f4f6; font-family: inherit; }
+  .um-item:hover { background: #f0fdfa; }
   .um-item:last-child { border-bottom: none; }
   .um-name { font-weight: 600; color: #111827; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .um-meta { color: #6b7280; font-size: 12px; white-space: nowrap; }
+  .um-go { color: #0f766e; font-weight: 700; font-size: 12px; white-space: nowrap; }
+  .um-hint { font-size: 11.5px; color: #6b7280; margin: 8px 2px 2px; }
+  .um-hint a { color: #0f766e; font-weight: 600; }
+  tr.row-flash { animation: rowFlash 2s ease; }
+  @keyframes rowFlash { 0%,60% { background: #ccfbf1; } 100% { background: transparent; } }
   .um-foot { padding: 12px 18px; border-top: 1px solid #e5e7eb; text-align: right; }
 
   /* --- แถวลูกในกลุ่ม clinicalKey เดียวกัน (คนละบริษัท) จัดชิดกันใต้แถวแรกของกลุ่ม --- */
@@ -759,12 +767,28 @@
       body.innerHTML = '✅ ทุกอุปกรณ์จับคู่รหัสเบิกแล้ว';
     } else {
       body.className = 'um-body';
-      body.innerHTML = unm.map(d => {
-        const vb = d.vendor || '—';
-        return '<div class="um-item"><span class="um-name" title="' + escapeHtml(d.itemName) + '">' +
-          escapeHtml(d.itemName) + '</span><span class="um-meta">' + escapeHtml(vb) + ' · ' +
-          (d.clinicalKey ? escapeHtml(d.clinicalKey) : '') + '</span></div>';
-      }).join('');
+      body.innerHTML = '<div class="um-hint">คลิกอุปกรณ์เพื่อไปแก้ไขรหัสเบิกในตารางด้านล่าง</div>' +
+        unm.map(d => {
+          const vb = d.vendor || '—';
+          return '<button type="button" class="um-item" data-id="' + d.id + '" onclick="gotoEditDevice(' + d.id + ')">' +
+            '<span class="um-name" title="' + escapeHtml(d.itemName) + '">' + escapeHtml(d.itemName) + '</span>' +
+            '<span class="um-meta">' + escapeHtml(vb) + ' · ' + (d.clinicalKey ? escapeHtml(d.clinicalKey) : '') + '</span>' +
+            '<span class="um-go">แก้ไข →</span></button>';
+        }).join('') +
+        '<div class="um-hint">หรือถ้าอุปกรณ์นี้ยังไม่มีรหัสเบิกที่ถูกต้อง → <a href="edit_claim_code.html">เพิ่ม/แก้ไขรหัสเบิกที่นี่</a></div>';
+    }
+  }
+  // คลิกป๊อปอัป → ปิด + ไปที่แถวอุปกรณ์นั้น + เปิดโหมดแก้ไข + ไฮไลต์
+  function gotoEditDevice(id) {
+    closeUnmatchedPopup();
+    const d = devices.find(x => x.id === id);
+    if (d) d.locked = false;            // เข้า edit mode
+    renderTable();
+    const tr = document.querySelector('#tbody tr[data-id="' + id + '"]');
+    if (tr) {
+      tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      tr.classList.add('row-flash');
+      setTimeout(() => tr.classList.remove('row-flash'), 2000);
     }
   }
   function openUnmatchedPopup() { refreshUnmatched(); document.getElementById('umOverlay').classList.add('open'); }
