@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>บันทึกการใช้อุปกรณ์ — ศัลยกรรมกระดูก (v6)</title>
+<title>บันทึกการใช้อุปกรณ์ — ศัลยกรรมกระดูก (v7)</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: "Noto Sans Thai", "Sarabun", system-ui, sans-serif; background: #f2f4f8; color: #1e293b; padding: 20px; }
@@ -139,10 +139,9 @@
   }
   th.mx-col-size { z-index: 9; background: #f8fafc; }
   td.mx-col-hosp, th.mx-col-hosp {
-    position: sticky; left: 86px; z-index: 3; background: #f0fdf4;
-    border-right: 2px solid #bbf7d0;
+    background: #f0fdf4;
   }
-  th.mx-col-hosp { z-index: 9; background: #ecfdf5; }
+  th.mx-col-hosp { background: #ecfdf5; }
   tr.mx-row5 td, tr.mx-row5 th.mx-col-size { border-bottom: 2px solid #94a3b8; }
   .mx-cellbtn {
     display: flex; align-items: center; justify-content: center;
@@ -157,6 +156,27 @@
     min-height: 44px; min-width: 68px; color: #cbd5e1; font-size: 13px;
   }
   .mx-legend { font-size: 11px; color: #64748b; padding: 7px 10px; border-top: 1px solid #eef2f6; background: #fff; }
+
+  /* ---- vendor affinity: ดันบริษัทเดียวกันกับรายการที่ผู้ใช้เพิ่งเลือกขึ้นก่อน (ไม่ตัดบริษัทอื่นออก) ---- */
+  .vendor-affinity-hint {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    font-size: 12px; font-weight: 600; color: #0f766e; background: #f0fdfa;
+    border-bottom: 1px solid #ccfbf1; padding: 7px 10px;
+  }
+  .dev-combo-opt.vendor-affinity { background: #f7fffe; border-left: 3px solid #14b8a6; padding-left: 7px; }
+  .dev-combo-opt.vendor-affinity:hover, .dev-combo-opt.vendor-affinity.active { background: #ecfefb; }
+  .aff-dot { color: #14b8a6; font-size: 10px; }
+  td.mx-col-lead, th.mx-col-lead {
+    position: sticky; left: 86px; z-index: 4; background: #fff;
+    border-right: 2px solid #e2e8f0;
+  }
+  th.mx-col-lead { z-index: 9; background: #f8fafc; }
+  td.mx-col-vendoractive, th.mx-col-vendoractive { background: #f0fdfa; }
+  th.mx-col-vendoractive { background: #ccfbf1; color: #0f766e; }
+  .mx-col-lead.mx-col-hosp { border-right-color: #bbf7d0; }
+  .mx-col-lead.mx-col-vendoractive { border-right-color: #5eead4; }
+  .mx-col-vendoractive .mx-cellbtn { background: rgba(20,184,166,.07); }
+  .mx-affinity-tag { font-size: 9.5px; font-weight: 700; color: #0f766e; }
 
   /* ---- modal ยืนยันข้ามบริษัท (default รพ. -> อื่น) ---- */
   .cv-modal-overlay {
@@ -178,7 +198,7 @@
 <div class="wrap">
   <header>
     <h1>📋 บันทึกการใช้อุปกรณ์ — ศัลยกรรมกระดูก</h1>
-    <p>รวมรายการอุปกรณ์ทั้งหมดจากหน้าจับคู่รหัสสิทธิ์ · demo — ยังไม่เชื่อมฐานข้อมูลจริง · v6 เพิ่ม Matrix view (ขนาด × บริษัท) เมื่อผลค้นหาเยอะ</p>
+    <p>รวมรายการอุปกรณ์ทั้งหมดจากหน้าจับคู่รหัสสิทธิ์ · demo — ยังไม่เชื่อมฐานข้อมูลจริง · v6 เพิ่ม Matrix view (ขนาด × บริษัท) เมื่อผลค้นหาเยอะ · v7 เพิ่ม vendor affinity (ดันบริษัทเดียวกับรายการล่าสุดขึ้นก่อน อัตโนมัติ)</p>
     <div class="mixed-badge" id="mixedBadge">เคสนี้: ยังไม่มีรายการ</div>
     <nav class="pagenav">
       <a href="lockingscrew35_usage_form.html" class="current">📋 บันทึกการใช้อุปกรณ์</a>
@@ -316,7 +336,204 @@
     { id: 323, category: 'screw-cortex', itemName: 'Cortex screw 3.5×45mm', vendor: 'Emerson', code: '7302', variant: '', clinicalKey: 'cortex-3.5x45', stock: 4, cost: null },
     { id: 324, category: 'screw-cortex', itemName: 'Cortex screw 3.5×45mm', vendor: 'Rockwood', code: '7302', variant: '', clinicalKey: 'cortex-3.5x45', stock: 2, cost: null },
     { id: 325, category: 'screw-cortex', itemName: 'Cortex screw 3.5×50mm', vendor: 'รพ.', code: '7302', variant: '', clinicalKey: 'cortex-3.5x50', stock: 6, cost: 215 },
-    { id: 326, category: 'screw-cortex', itemName: 'Cortex screw 3.5×50mm', vendor: 'MDC', code: '7302', variant: '', clinicalKey: 'cortex-3.5x50', stock: 3, cost: null }
+    { id: 326, category: 'screw-cortex', itemName: 'Cortex screw 3.5×50mm', vendor: 'MDC', code: '7302', variant: '', clinicalKey: 'cortex-3.5x50', stock: 3, cost: null },
+    // ==== Emerson Plate catalog (ของจริงจาก Emerson_09-09-69.xlsx, sheet 'รายการวาง (2)', หมวด A/B/E) ====
+    // รหัสเบิก (code) แมปแบบ 'ตรงที่สุดจาก RIGHTS ที่มีอยู่จริง' — ไม่ invent รหัสใหม่:
+    //   7214 variant A = general/diaphyseal locking compression plate (RIGHTS: 'Locking compression plate')
+    //   7214 variant B = periarticular/metaphyseal locking plate ใกล้ข้อ (RIGHTS: 'ชนิดหัวล็อกสำหรับใส่ข้อ')
+    //   code: '' = ยังไม่มีรหัสใน RIGHTS ที่ตรง (เช่น Mini Plate 1.5mm hand set — ราคาต่างสเกลจาก 7214 มาก) ต้องเพิ่มรหัสใหม่ภายหลัง
+    // stock: null เพราะ Emerson consignment placement list ไม่ใช่ตัวเลขสต็อกใช้งานจริง (ไม่ invent ตัวเลข)
+    { id: 1000, category: 'plate', family: 'เพลทตะขอไหปลาร้า (Clavicle Hook)', itemName: 'Clavicle Hook Locking Plate H2 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11008002l', stock: null, cost: null },
+    { id: 1001, category: 'plate', family: 'เพลทตะขอไหปลาร้า (Clavicle Hook)', itemName: 'Clavicle Hook Locking Plate H2 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11008002r', stock: null, cost: null },
+    { id: 1002, category: 'plate', family: 'เพลทตะขอไหปลาร้า (Clavicle Hook)', itemName: 'Clavicle Hook Locking Plate H3 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11008003l', stock: null, cost: null },
+    { id: 1003, category: 'plate', family: 'เพลทตะขอไหปลาร้า (Clavicle Hook)', itemName: 'Clavicle Hook Locking Plate H3 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11008003r', stock: null, cost: null },
+    { id: 1004, category: 'plate', family: 'เพลทตะขอไหปลาร้า (Clavicle Hook)', itemName: 'Clavicle Hook Locking Plate H4 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11008004l', stock: null, cost: null },
+    { id: 1005, category: 'plate', family: 'เพลทตะขอไหปลาร้า (Clavicle Hook)', itemName: 'Clavicle Hook Locking Plate H4 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11008004r', stock: null, cost: null },
+    { id: 1006, category: 'plate', family: 'เพลทตะขอไหปลาร้า (Clavicle Hook)', itemName: 'Clavicle Hook Locking Plate H5 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11008005l', stock: null, cost: null },
+    { id: 1007, category: 'plate', family: 'เพลทตะขอไหปลาร้า (Clavicle Hook)', itemName: 'Clavicle Hook Locking Plate H5 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11008005r', stock: null, cost: null },
+    { id: 1008, category: 'plate', family: 'เพลทตะขอไหปลาร้า (Clavicle Hook)', itemName: 'Clavicle Hook Locking Plate H6 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11008006l', stock: null, cost: null },
+    { id: 1009, category: 'plate', family: 'เพลทตะขอไหปลาร้า (Clavicle Hook)', itemName: 'Clavicle Hook Locking Plate H6 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11008006r', stock: null, cost: null },
+    { id: 1010, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านนอก (Distal Humerus Lateral)', itemName: 'Distal Humerus Lateral Locking Plate H4 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11009004l', stock: null, cost: null },
+    { id: 1011, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านนอก (Distal Humerus Lateral)', itemName: 'Distal Humerus Lateral Locking Plate H4 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11009004r', stock: null, cost: null },
+    { id: 1012, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านนอก (Distal Humerus Lateral)', itemName: 'Distal Humerus Lateral Locking Plate H6 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11009006l', stock: null, cost: null },
+    { id: 1013, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านนอก (Distal Humerus Lateral)', itemName: 'Distal Humerus Lateral Locking Plate H6 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11009006r', stock: null, cost: null },
+    { id: 1014, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านนอก (Distal Humerus Lateral)', itemName: 'Distal Humerus Lateral Locking Plate H8 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11009008l', stock: null, cost: null },
+    { id: 1015, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านนอก (Distal Humerus Lateral)', itemName: 'Distal Humerus Lateral Locking Plate H8 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11009008r', stock: null, cost: null },
+    { id: 1016, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านนอก (Distal Humerus Lateral)', itemName: 'Distal Humerus Lateral Locking Plate H10 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11009010l', stock: null, cost: null },
+    { id: 1017, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านนอก (Distal Humerus Lateral)', itemName: 'Distal Humerus Lateral Locking Plate H10 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11009010r', stock: null, cost: null },
+    { id: 1018, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านนอก (Distal Humerus Lateral)', itemName: 'Distal Humerus Lateral Locking Plate H12 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11009012l', stock: null, cost: null },
+    { id: 1019, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านนอก (Distal Humerus Lateral)', itemName: 'Distal Humerus Lateral Locking Plate H12 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11009012r', stock: null, cost: null },
+    { id: 1020, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านใน (Distal Humerus Medial)', itemName: 'Distal Humerus Medial Locking Plate H4 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11010004l', stock: null, cost: null },
+    { id: 1021, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านใน (Distal Humerus Medial)', itemName: 'Distal Humerus Medial Locking Plate H4 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11010004r', stock: null, cost: null },
+    { id: 1022, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านใน (Distal Humerus Medial)', itemName: 'Distal Humerus Medial Locking Plate H6 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11010006l', stock: null, cost: null },
+    { id: 1023, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านใน (Distal Humerus Medial)', itemName: 'Distal Humerus Medial Locking Plate H6 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11010006r', stock: null, cost: null },
+    { id: 1024, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านใน (Distal Humerus Medial)', itemName: 'Distal Humerus Medial Locking Plate H8 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11010008l', stock: null, cost: null },
+    { id: 1025, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านใน (Distal Humerus Medial)', itemName: 'Distal Humerus Medial Locking Plate H8 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11010008r', stock: null, cost: null },
+    { id: 1026, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านใน (Distal Humerus Medial)', itemName: 'Distal Humerus Medial Locking Plate H10 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11010010l', stock: null, cost: null },
+    { id: 1027, category: 'plate', family: 'เพลทปลายกระดูกต้นแขนด้านใน (Distal Humerus Medial)', itemName: 'Distal Humerus Medial Locking Plate H10 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11010010r', stock: null, cost: null },
+    { id: 1028, category: 'plate', family: 'เพลทปลายกระดูกเรเดียส 2.7 (Distal Radius)', itemName: 'Distal Radius Locking Plate H3 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11005003l', stock: null, cost: null },
+    { id: 1029, category: 'plate', family: 'เพลทปลายกระดูกเรเดียส 2.7 (Distal Radius)', itemName: 'Distal Radius Locking Plate H3 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11005003r', stock: null, cost: null },
+    { id: 1030, category: 'plate', family: 'เพลทปลายกระดูกเรเดียส 2.7 (Distal Radius)', itemName: 'Distal Radius Locking Plate H4 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11005004l', stock: null, cost: null },
+    { id: 1031, category: 'plate', family: 'เพลทปลายกระดูกเรเดียส 2.7 (Distal Radius)', itemName: 'Distal Radius Locking Plate H4 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11005004r', stock: null, cost: null },
+    { id: 1032, category: 'plate', family: 'เพลทปลายกระดูกเรเดียส 2.7 (Distal Radius)', itemName: 'Distal Radius Locking Plate H5 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11005005l', stock: null, cost: null },
+    { id: 1033, category: 'plate', family: 'เพลทปลายกระดูกเรเดียส 2.7 (Distal Radius)', itemName: 'Distal Radius Locking Plate H5 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11005005r', stock: null, cost: null },
+    { id: 1034, category: 'plate', family: 'เพลทปลายกระดูกเรเดียส 2.7 (Distal Radius)', itemName: 'Distal Radius Locking Plate H6 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11005006l', stock: null, cost: null },
+    { id: 1035, category: 'plate', family: 'เพลทปลายกระดูกเรเดียส 2.7 (Distal Radius)', itemName: 'Distal Radius Locking Plate H6 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11005006r', stock: null, cost: null },
+    { id: 1036, category: 'plate', family: 'เพลทปลายกระดูกเรเดียส 2.7 (Distal Radius)', itemName: 'Distal Radius Locking Plate H7 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11005007l', stock: null, cost: null },
+    { id: 1037, category: 'plate', family: 'เพลทปลายกระดูกเรเดียส 2.7 (Distal Radius)', itemName: 'Distal Radius Locking Plate H7 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11005007r', stock: null, cost: null },
+    { id: 1038, category: 'plate', family: 'เพลทโอเลครานอน (Olecranon)', itemName: 'Olecranon Locking Plate H4 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11016004l', stock: null, cost: null },
+    { id: 1039, category: 'plate', family: 'เพลทโอเลครานอน (Olecranon)', itemName: 'Olecranon Locking Plate H4 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11016004r', stock: null, cost: null },
+    { id: 1040, category: 'plate', family: 'เพลทโอเลครานอน (Olecranon)', itemName: 'Olecranon Locking Plate H5 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11016005l', stock: null, cost: null },
+    { id: 1041, category: 'plate', family: 'เพลทโอเลครานอน (Olecranon)', itemName: 'Olecranon Locking Plate H5 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11016005r', stock: null, cost: null },
+    { id: 1042, category: 'plate', family: 'เพลทโอเลครานอน (Olecranon)', itemName: 'Olecranon Locking Plate H6 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11016006l', stock: null, cost: null },
+    { id: 1043, category: 'plate', family: 'เพลทโอเลครานอน (Olecranon)', itemName: 'Olecranon Locking Plate H6 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11016006r', stock: null, cost: null },
+    { id: 1044, category: 'plate', family: 'เพลทโอเลครานอน (Olecranon)', itemName: 'Olecranon Locking Plate H7 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11016007l', stock: null, cost: null },
+    { id: 1045, category: 'plate', family: 'เพลทโอเลครานอน (Olecranon)', itemName: 'Olecranon Locking Plate H7 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11016007r', stock: null, cost: null },
+    { id: 1046, category: 'plate', family: 'เพลทวันเทิร์ด (One-Third)', itemName: 'One-Third Locking Plate H4T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11002004', stock: null, cost: null },
+    { id: 1047, category: 'plate', family: 'เพลทวันเทิร์ด (One-Third)', itemName: 'One-Third Locking Plate H5T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11002005', stock: null, cost: null },
+    { id: 1048, category: 'plate', family: 'เพลทวันเทิร์ด (One-Third)', itemName: 'One-Third Locking Plate H6T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11002006', stock: null, cost: null },
+    { id: 1049, category: 'plate', family: 'เพลทวันเทิร์ด (One-Third)', itemName: 'One-Third Locking Plate H7T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11002007', stock: null, cost: null },
+    { id: 1050, category: 'plate', family: 'เพลทวันเทิร์ด (One-Third)', itemName: 'One-Third Locking Plate H8T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11002008', stock: null, cost: null },
+    { id: 1051, category: 'plate', family: 'เพลทวันเทิร์ด (One-Third)', itemName: 'One-Third Locking Plate H9T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11002009', stock: null, cost: null },
+    { id: 1052, category: 'plate', family: 'เพลทต้นกระดูกต้นแขน (Proximal Humerus)', itemName: 'Proximal Humerus Locking plate H2T', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11004002', stock: null, cost: null },
+    { id: 1053, category: 'plate', family: 'เพลทต้นกระดูกต้นแขน (Proximal Humerus)', itemName: 'Proximal Humerus Locking plate H3T', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11004003', stock: null, cost: null },
+    { id: 1054, category: 'plate', family: 'เพลทต้นกระดูกต้นแขน (Proximal Humerus)', itemName: 'Proximal Humerus Locking plate H4T', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11004004', stock: null, cost: null },
+    { id: 1055, category: 'plate', family: 'เพลทต้นกระดูกต้นแขน (Proximal Humerus)', itemName: 'Proximal Humerus Locking plate H5T', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11004005', stock: null, cost: null },
+    { id: 1056, category: 'plate', family: 'เพลทต้นกระดูกต้นแขน (Proximal Humerus)', itemName: 'Proximal Humerus Locking plate H6T', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11004006', stock: null, cost: null },
+    { id: 1057, category: 'plate', family: 'เพลทต้นกระดูกต้นแขน (Proximal Humerus)', itemName: 'Proximal Humerus Locking plate H7T', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11004007', stock: null, cost: null },
+    { id: 1058, category: 'plate', family: 'เพลทต้นกระดูกต้นแขน (Proximal Humerus)', itemName: 'Proximal Humerus Locking plate H8T', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11004008', stock: null, cost: null },
+    { id: 1059, category: 'plate', family: 'เพลทต้นกระดูกต้นแขน (Proximal Humerus)', itemName: 'Proximal Humerus Locking plate H10T', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11004010', stock: null, cost: null },
+    { id: 1060, category: 'plate', family: 'เพลทรีคอนสตรัคชัน (Reconstruction)', itemName: 'Reconstruction Locking Plate H5T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11003005', stock: null, cost: null },
+    { id: 1061, category: 'plate', family: 'เพลทรีคอนสตรัคชัน (Reconstruction)', itemName: 'Reconstruction Locking Plate H6T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11003006', stock: null, cost: null },
+    { id: 1062, category: 'plate', family: 'เพลทรีคอนสตรัคชัน (Reconstruction)', itemName: 'Reconstruction Locking Plate H7T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11003007', stock: null, cost: null },
+    { id: 1063, category: 'plate', family: 'เพลทรีคอนสตรัคชัน (Reconstruction)', itemName: 'Reconstruction Locking Plate H8T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11003008', stock: null, cost: null },
+    { id: 1064, category: 'plate', family: 'เพลทรีคอนสตรัคชัน (Reconstruction)', itemName: 'Reconstruction Locking Plate H9T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11003009', stock: null, cost: null },
+    { id: 1065, category: 'plate', family: 'เพลทรีคอนสตรัคชัน (Reconstruction)', itemName: 'Reconstruction Locking Plate H10T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11003010', stock: null, cost: null },
+    { id: 1066, category: 'plate', family: 'เพลทรีคอนสตรัคชัน (Reconstruction)', itemName: 'Reconstruction Locking Plate H11T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11003011', stock: null, cost: null },
+    { id: 1067, category: 'plate', family: 'เพลทรีคอนสตรัคชัน (Reconstruction)', itemName: 'Reconstruction Locking Plate H12T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11003012', stock: null, cost: null },
+    { id: 1068, category: 'plate', family: 'เพลทไหปลาร้ารูปกายวิภาค (S-Clavicle Anatomical)', itemName: 'S-Clavical Locking Plate Anatomical H6 RT', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11025006r', stock: null, cost: null },
+    { id: 1069, category: 'plate', family: 'เพลทไหปลาร้ารูปกายวิภาค (S-Clavicle Anatomical)', itemName: 'S-Clavical Locking Plate Anatomical H8 LT', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11025008l', stock: null, cost: null },
+    { id: 1070, category: 'plate', family: 'เพลทไหปลาร้ารูปกายวิภาค (S-Clavicle Anatomical)', itemName: 'S-Clavical Locking Plate Anatomical H10 RT', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11025010r', stock: null, cost: null },
+    { id: 1071, category: 'plate', family: 'เพลทไหปลาร้า (S-Clavicle)', itemName: 'S-Clavicle Locking Plate H7 LT', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11007007l', stock: null, cost: null },
+    { id: 1072, category: 'plate', family: 'เพลทไหปลาร้า (S-Clavicle)', itemName: 'S-Clavicle Locking Plate H7 RT', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11007007r', stock: null, cost: null },
+    { id: 1073, category: 'plate', family: 'เพลทไหปลาร้า (S-Clavicle)', itemName: 'S-Clavicle Locking Plate H9 LT', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11007009l', stock: null, cost: null },
+    { id: 1074, category: 'plate', family: 'เพลทไหปลาร้า (S-Clavicle)', itemName: 'S-Clavicle Locking Plate H9 RT', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11007009r', stock: null, cost: null },
+    { id: 1075, category: 'plate', family: 'เพลทไหปลาร้า (S-Clavicle)', itemName: 'S-Clavicle Locking Plate H10 LT', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11007010l', stock: null, cost: null },
+    { id: 1076, category: 'plate', family: 'เพลทไหปลาร้า (S-Clavicle)', itemName: 'S-Clavicle Locking Plate H10 RT', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11007010r', stock: null, cost: null },
+    { id: 1077, category: 'plate', family: 'เพลทอัลนา/เรเดียส (Ulna & Radius LCP)', itemName: 'Ulna&Radius Locking Compression Plate H4T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11001004', stock: null, cost: null },
+    { id: 1078, category: 'plate', family: 'เพลทอัลนา/เรเดียส (Ulna & Radius LCP)', itemName: 'Ulna&Radius Locking Compression Plate H5T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11001005', stock: null, cost: null },
+    { id: 1079, category: 'plate', family: 'เพลทอัลนา/เรเดียส (Ulna & Radius LCP)', itemName: 'Ulna&Radius Locking Compression Plate H6T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11001006', stock: null, cost: null },
+    { id: 1080, category: 'plate', family: 'เพลทอัลนา/เรเดียส (Ulna & Radius LCP)', itemName: 'Ulna&Radius Locking Compression Plate H7T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11001007', stock: null, cost: null },
+    { id: 1081, category: 'plate', family: 'เพลทอัลนา/เรเดียส (Ulna & Radius LCP)', itemName: 'Ulna&Radius Locking Compression Plate H8T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11001008', stock: null, cost: null },
+    { id: 1082, category: 'plate', family: 'เพลทอัลนา/เรเดียส (Ulna & Radius LCP)', itemName: 'Ulna&Radius Locking Compression Plate H9T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11001009', stock: null, cost: null },
+    { id: 1083, category: 'plate', family: 'เพลทอัลนา/เรเดียส (Ulna & Radius LCP)', itemName: 'Ulna&Radius Locking Compression Plate H10T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e11001010', stock: null, cost: null },
+    { id: 1084, category: 'plate', family: 'เพลทปลายกระดูกต้นขา (Distal Femur)', itemName: 'Distal Femur Locking Plate H5 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12005005l', stock: null, cost: null },
+    { id: 1085, category: 'plate', family: 'เพลทปลายกระดูกต้นขา (Distal Femur)', itemName: 'Distal Femur Locking Plate H5 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12005005r', stock: null, cost: null },
+    { id: 1086, category: 'plate', family: 'เพลทปลายกระดูกต้นขา (Distal Femur)', itemName: 'Distal Femur Locking Plate H7 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12005007l', stock: null, cost: null },
+    { id: 1087, category: 'plate', family: 'เพลทปลายกระดูกต้นขา (Distal Femur)', itemName: 'Distal Femur Locking Plate H7 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12005007r', stock: null, cost: null },
+    { id: 1088, category: 'plate', family: 'เพลทปลายกระดูกต้นขา (Distal Femur)', itemName: 'Distal Femur Locking Plate H9 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12005009l', stock: null, cost: null },
+    { id: 1089, category: 'plate', family: 'เพลทปลายกระดูกต้นขา (Distal Femur)', itemName: 'Distal Femur Locking Plate H9 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12005009r', stock: null, cost: null },
+    { id: 1090, category: 'plate', family: 'เพลทปลายกระดูกต้นขา (Distal Femur)', itemName: 'Distal Femur Locking Plate H11 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12005011l', stock: null, cost: null },
+    { id: 1091, category: 'plate', family: 'เพลทปลายกระดูกต้นขา (Distal Femur)', itemName: 'Distal Femur Locking Plate H11 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12005011r', stock: null, cost: null },
+    { id: 1092, category: 'plate', family: 'เพลทปลายกระดูกต้นขา (Distal Femur)', itemName: 'Distal Femur Locking Plate H13 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12005013l', stock: null, cost: null },
+    { id: 1093, category: 'plate', family: 'เพลทปลายกระดูกต้นขา (Distal Femur)', itemName: 'Distal Femur Locking Plate H13 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12005013r', stock: null, cost: null },
+    { id: 1094, category: 'plate', family: 'เพลทปลายกระดูกน่อง (Distal Fibula)', itemName: 'Distal Fibula Locking Plate H3 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11015003l', stock: null, cost: null },
+    { id: 1095, category: 'plate', family: 'เพลทปลายกระดูกน่อง (Distal Fibula)', itemName: 'Distal Fibula Locking Plate H3 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11015003r', stock: null, cost: null },
+    { id: 1096, category: 'plate', family: 'เพลทปลายกระดูกน่อง (Distal Fibula)', itemName: 'Distal Fibula Locking Plate H5 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11015005l', stock: null, cost: null },
+    { id: 1097, category: 'plate', family: 'เพลทปลายกระดูกน่อง (Distal Fibula)', itemName: 'Distal Fibula Locking Plate H5 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11015005r', stock: null, cost: null },
+    { id: 1098, category: 'plate', family: 'เพลทปลายกระดูกน่อง (Distal Fibula)', itemName: 'Distal Fibula Locking Plate H7 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11015007l', stock: null, cost: null },
+    { id: 1099, category: 'plate', family: 'เพลทปลายกระดูกน่อง (Distal Fibula)', itemName: 'Distal Fibula Locking Plate H7 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11015007r', stock: null, cost: null },
+    { id: 1100, category: 'plate', family: 'เพลทปลายกระดูกน่อง (Distal Fibula)', itemName: 'Distal Fibula Locking Plate H9 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11015009l', stock: null, cost: null },
+    { id: 1101, category: 'plate', family: 'เพลทปลายกระดูกน่อง (Distal Fibula)', itemName: 'Distal Fibula Locking Plate H9 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11015009r', stock: null, cost: null },
+    { id: 1102, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน (Distal Tibial Medial)', itemName: 'Distal Tibial  Medial Locking Plate H5 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11011005l', stock: null, cost: null },
+    { id: 1103, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน (Distal Tibial Medial)', itemName: 'Distal Tibial  Medial Locking Plate H5 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11011005r', stock: null, cost: null },
+    { id: 1104, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน (Distal Tibial Medial)', itemName: 'Distal Tibial  Medial Locking Plate H7 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11011007l', stock: null, cost: null },
+    { id: 1105, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน (Distal Tibial Medial)', itemName: 'Distal Tibial  Medial Locking Plate H7 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11011007r', stock: null, cost: null },
+    { id: 1106, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน (Distal Tibial Medial)', itemName: 'Distal Tibial  Medial Locking Plate H9 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11011009l', stock: null, cost: null },
+    { id: 1107, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน (Distal Tibial Medial)', itemName: 'Distal Tibial  Medial Locking Plate H9 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11011009r', stock: null, cost: null },
+    { id: 1108, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน (Distal Tibial Medial)', itemName: 'Distal Tibial  Medial Locking Plate H11 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11011011l', stock: null, cost: null },
+    { id: 1109, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน (Distal Tibial Medial)', itemName: 'Distal Tibial  Medial Locking Plate H11 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11011011r', stock: null, cost: null },
+    { id: 1110, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน (Distal Tibial Medial)', itemName: 'Distal Tibial  Medial Locking Plate H13 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11011013l', stock: null, cost: null },
+    { id: 1111, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน (Distal Tibial Medial)', itemName: 'Distal Tibial  Medial Locking Plate H13 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11011013r', stock: null, cost: null },
+    { id: 1112, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน รุ่น B (Distal Tibial Medial-B)', itemName: 'Distal Tibial  Medial Locking Plate-B H5 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11012005l', stock: null, cost: null },
+    { id: 1113, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน รุ่น B (Distal Tibial Medial-B)', itemName: 'Distal Tibial  Medial Locking Plate-B H5 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11012005r', stock: null, cost: null },
+    { id: 1114, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน รุ่น B (Distal Tibial Medial-B)', itemName: 'Distal Tibial  Medial Locking Plate-B H7 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11012007l', stock: null, cost: null },
+    { id: 1115, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน รุ่น B (Distal Tibial Medial-B)', itemName: 'Distal Tibial  Medial Locking Plate-B H7 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11012007r', stock: null, cost: null },
+    { id: 1116, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน รุ่น B (Distal Tibial Medial-B)', itemName: 'Distal Tibial  Medial Locking Plate-B H9 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11012009l', stock: null, cost: null },
+    { id: 1117, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน รุ่น B (Distal Tibial Medial-B)', itemName: 'Distal Tibial  Medial Locking Plate-B H9 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11012009r', stock: null, cost: null },
+    { id: 1118, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน รุ่น B (Distal Tibial Medial-B)', itemName: 'Distal Tibial  Medial Locking Plate-B H11 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11012011l', stock: null, cost: null },
+    { id: 1119, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน รุ่น B (Distal Tibial Medial-B)', itemName: 'Distal Tibial  Medial Locking Plate-B H11 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11012011r', stock: null, cost: null },
+    { id: 1120, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน รุ่น B (Distal Tibial Medial-B)', itemName: 'Distal Tibial  Medial Locking Plate-B H12 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11012012l', stock: null, cost: null },
+    { id: 1121, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านใน รุ่น B (Distal Tibial Medial-B)', itemName: 'Distal Tibial  Medial Locking Plate-B H12 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11012012r', stock: null, cost: null },
+    { id: 1122, category: 'plate', family: 'เพลทปลายกระดูกหน้าแข้งด้านหน้า (Distal Tibial Front Side)', itemName: 'Distal Tibial Front Side Locking Plate H7 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11018007r', stock: null, cost: null },
+    { id: 1123, category: 'plate', family: 'เพลท LC-DCP กระดูกต้นขา (Femoral LC-DCP)', itemName: 'Femoral LC-DCP Locking Plate H8T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12001008', stock: null, cost: null },
+    { id: 1124, category: 'plate', family: 'เพลท LC-DCP กระดูกต้นขา (Femoral LC-DCP)', itemName: 'Femoral LC-DCP Locking Plate H9T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12001009', stock: null, cost: null },
+    { id: 1125, category: 'plate', family: 'เพลท LC-DCP กระดูกต้นขา (Femoral LC-DCP)', itemName: 'Femoral LC-DCP Locking Plate H10T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12001010', stock: null, cost: null },
+    { id: 1126, category: 'plate', family: 'เพลท LC-DCP กระดูกต้นขา (Femoral LC-DCP)', itemName: 'Femoral LC-DCP Locking Plate H11T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12001011', stock: null, cost: null },
+    { id: 1127, category: 'plate', family: 'เพลท LC-DCP กระดูกต้นขา (Femoral LC-DCP)', itemName: 'Femoral LC-DCP Locking Plate H12T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12001012', stock: null, cost: null },
+    { id: 1128, category: 'plate', family: 'เพลท LC-DCP กระดูกต้นขา (Femoral LC-DCP)', itemName: 'Femoral LC-DCP Locking Plate H13T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12001013', stock: null, cost: null },
+    { id: 1129, category: 'plate', family: 'เพลท LC-DCP กระดูกต้นขา (Femoral LC-DCP)', itemName: 'Femoral LC-DCP Locking Plate H14T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12001014', stock: null, cost: null },
+    { id: 1130, category: 'plate', family: 'เพลทต้นกระดูกต้นขา รุ่น F (Proximal Femoral-F)', itemName: 'Proximal Femoral Locking Plate-F H5 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12006005l', stock: null, cost: null },
+    { id: 1131, category: 'plate', family: 'เพลทต้นกระดูกต้นขา รุ่น F (Proximal Femoral-F)', itemName: 'Proximal Femoral Locking Plate-F H5 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12006005r', stock: null, cost: null },
+    { id: 1132, category: 'plate', family: 'เพลทต้นกระดูกต้นขา รุ่น F (Proximal Femoral-F)', itemName: 'Proximal Femoral Locking Plate-F H7 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12006007l', stock: null, cost: null },
+    { id: 1133, category: 'plate', family: 'เพลทต้นกระดูกต้นขา รุ่น F (Proximal Femoral-F)', itemName: 'Proximal Femoral Locking Plate-F H7 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12006007r', stock: null, cost: null },
+    { id: 1134, category: 'plate', family: 'เพลทต้นกระดูกต้นขา รุ่น F (Proximal Femoral-F)', itemName: 'Proximal Femoral Locking Plate-F H9 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12006009l', stock: null, cost: null },
+    { id: 1135, category: 'plate', family: 'เพลทต้นกระดูกต้นขา รุ่น F (Proximal Femoral-F)', itemName: 'Proximal Femoral Locking Plate-F H9 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12006009r', stock: null, cost: null },
+    { id: 1136, category: 'plate', family: 'เพลทต้นกระดูกต้นขา รุ่น F (Proximal Femoral-F)', itemName: 'Proximal Femoral Locking Plate-F H11 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12006011l', stock: null, cost: null },
+    { id: 1137, category: 'plate', family: 'เพลทต้นกระดูกต้นขา รุ่น F (Proximal Femoral-F)', itemName: 'Proximal Femoral Locking Plate-F H11 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12006011r', stock: null, cost: null },
+    { id: 1138, category: 'plate', family: 'เพลทต้นกระดูกต้นขา รุ่น F (Proximal Femoral-F)', itemName: 'Proximal Femoral Locking Plate-F H13 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12006013l', stock: null, cost: null },
+    { id: 1139, category: 'plate', family: 'เพลทต้นกระดูกต้นขา รุ่น F (Proximal Femoral-F)', itemName: 'Proximal Femoral Locking Plate-F H13 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12006013r', stock: null, cost: null },
+    { id: 1140, category: 'plate', family: 'เพลท LC-DCP กระดูกหน้าแข้ง (Tibial LC-DCP)', itemName: 'Tibial LC-DCP Locking Plate H5T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12002005', stock: null, cost: null },
+    { id: 1141, category: 'plate', family: 'เพลท LC-DCP กระดูกหน้าแข้ง (Tibial LC-DCP)', itemName: 'Tibial LC-DCP Locking Plate H6T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12002006', stock: null, cost: null },
+    { id: 1142, category: 'plate', family: 'เพลท LC-DCP กระดูกหน้าแข้ง (Tibial LC-DCP)', itemName: 'Tibial LC-DCP Locking Plate H7T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12002007', stock: null, cost: null },
+    { id: 1143, category: 'plate', family: 'เพลท LC-DCP กระดูกหน้าแข้ง (Tibial LC-DCP)', itemName: 'Tibial LC-DCP Locking Plate H8T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12002008', stock: null, cost: null },
+    { id: 1144, category: 'plate', family: 'เพลท LC-DCP กระดูกหน้าแข้ง (Tibial LC-DCP)', itemName: 'Tibial LC-DCP Locking Plate H9T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12002009', stock: null, cost: null },
+    { id: 1145, category: 'plate', family: 'เพลท LC-DCP กระดูกหน้าแข้ง (Tibial LC-DCP)', itemName: 'Tibial LC-DCP Locking Plate H10T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12002010', stock: null, cost: null },
+    { id: 1146, category: 'plate', family: 'เพลท LC-DCP กระดูกหน้าแข้ง (Tibial LC-DCP)', itemName: 'Tibial LC-DCP Locking Plate H11T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12002011', stock: null, cost: null },
+    { id: 1147, category: 'plate', family: 'เพลท LC-DCP กระดูกหน้าแข้ง (Tibial LC-DCP)', itemName: 'Tibial LC-DCP Locking Plate H12T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12002012', stock: null, cost: null },
+    { id: 1148, category: 'plate', family: 'เพลท LC-DCP กระดูกหน้าแข้ง (Tibial LC-DCP)', itemName: 'Tibial LC-DCP Locking Plate H13T', vendor: 'Emerson', code: '7214', variant: 'A', clinicalKey: 'emerson-e12002013', stock: null, cost: null },
+    { id: 1149, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก (Tibial Plateau Lateral)', itemName: 'Tibial Plateau Lateral Locking Plate H5 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12003005l', stock: null, cost: null },
+    { id: 1150, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก (Tibial Plateau Lateral)', itemName: 'Tibial Plateau Lateral Locking Plate H5 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12003005r', stock: null, cost: null },
+    { id: 1151, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก (Tibial Plateau Lateral)', itemName: 'Tibial Plateau Lateral Locking Plate H7 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12003007l', stock: null, cost: null },
+    { id: 1152, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก (Tibial Plateau Lateral)', itemName: 'Tibial Plateau Lateral Locking Plate H7 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12003007r', stock: null, cost: null },
+    { id: 1153, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก (Tibial Plateau Lateral)', itemName: 'Tibial Plateau Lateral Locking Plate H9 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12003009l', stock: null, cost: null },
+    { id: 1154, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก (Tibial Plateau Lateral)', itemName: 'Tibial Plateau Lateral Locking Plate H9 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12003009r', stock: null, cost: null },
+    { id: 1155, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก (Tibial Plateau Lateral)', itemName: 'Tibial Plateau Lateral Locking Plate H11 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12003011l', stock: null, cost: null },
+    { id: 1156, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก (Tibial Plateau Lateral)', itemName: 'Tibial Plateau Lateral Locking Plate H11 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12003011r', stock: null, cost: null },
+    { id: 1157, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก (Tibial Plateau Lateral)', itemName: 'Tibial Plateau Lateral Locking Plate H13 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12003013l', stock: null, cost: null },
+    { id: 1158, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก (Tibial Plateau Lateral)', itemName: 'Tibial Plateau Lateral Locking Plate H13 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12003013r', stock: null, cost: null },
+    { id: 1159, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก รุ่น II (Tibial Plateau Lateral-II)', itemName: 'Tibial Plateau Lateral Locking Plate-II H5 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11013005l', stock: null, cost: null },
+    { id: 1160, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก รุ่น II (Tibial Plateau Lateral-II)', itemName: 'Tibial Plateau Lateral Locking Plate-II H5 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11013005r', stock: null, cost: null },
+    { id: 1161, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก รุ่น II (Tibial Plateau Lateral-II)', itemName: 'Tibial Plateau Lateral Locking Plate-II H7 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11013007l', stock: null, cost: null },
+    { id: 1162, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก รุ่น II (Tibial Plateau Lateral-II)', itemName: 'Tibial Plateau Lateral Locking Plate-II H9 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11013009l', stock: null, cost: null },
+    { id: 1163, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก รุ่น II (Tibial Plateau Lateral-II)', itemName: 'Tibial Plateau Lateral Locking Plate-II H9 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11013009r', stock: null, cost: null },
+    { id: 1164, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก รุ่น II (Tibial Plateau Lateral-II)', itemName: 'Tibial Plateau Lateral Locking Plate-II H11 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11013011l', stock: null, cost: null },
+    { id: 1165, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านนอก รุ่น II (Tibial Plateau Lateral-II)', itemName: 'Tibial Plateau Lateral Locking Plate-II H11 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11013011r', stock: null, cost: null },
+    { id: 1166, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านใน (Tibial Plateau Medial)', itemName: 'Tibial Plateau Medial Locking Plate H5 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12004005l', stock: null, cost: null },
+    { id: 1167, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านใน (Tibial Plateau Medial)', itemName: 'Tibial Plateau Medial Locking Plate H5 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12004005r', stock: null, cost: null },
+    { id: 1168, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านใน (Tibial Plateau Medial)', itemName: 'Tibial Plateau Medial Locking Plate H7 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12004007l', stock: null, cost: null },
+    { id: 1169, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านใน (Tibial Plateau Medial)', itemName: 'Tibial Plateau Medial Locking Plate H7 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12004007r', stock: null, cost: null },
+    { id: 1170, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านใน (Tibial Plateau Medial)', itemName: 'Tibial Plateau Medial Locking Plate H9 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12004009l', stock: null, cost: null },
+    { id: 1171, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านใน (Tibial Plateau Medial)', itemName: 'Tibial Plateau Medial Locking Plate H9 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12004009r', stock: null, cost: null },
+    { id: 1172, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านใน (Tibial Plateau Medial)', itemName: 'Tibial Plateau Medial Locking Plate H11 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12004011l', stock: null, cost: null },
+    { id: 1173, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านใน (Tibial Plateau Medial)', itemName: 'Tibial Plateau Medial Locking Plate H11 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12004011r', stock: null, cost: null },
+    { id: 1174, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านใน (Tibial Plateau Medial)', itemName: 'Tibial Plateau Medial Locking Plate H13 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12004013l', stock: null, cost: null },
+    { id: 1175, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านใน (Tibial Plateau Medial)', itemName: 'Tibial Plateau Medial Locking Plate H13 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e12004013r', stock: null, cost: null },
+    { id: 1176, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านใน รุ่น II (Tibial Plateau Medial-II)', itemName: 'Tibial Plateau Medial Locking Plate-II H5 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11014005l', stock: null, cost: null },
+    { id: 1177, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านใน รุ่น II (Tibial Plateau Medial-II)', itemName: 'Tibial Plateau Medial Locking Plate-II H5 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11014005r', stock: null, cost: null },
+    { id: 1178, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านใน รุ่น II (Tibial Plateau Medial-II)', itemName: 'Tibial Plateau Medial Locking Plate-II H7 LT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11014007l', stock: null, cost: null },
+    { id: 1179, category: 'plate', family: 'เพลทหัวกระดูกหน้าแข้งด้านใน รุ่น II (Tibial Plateau Medial-II)', itemName: 'Tibial Plateau Medial Locking Plate-II H7 RT', vendor: 'Emerson', code: '7214', variant: 'B', clinicalKey: 'emerson-e11014007r', stock: null, cost: null },
+    { id: 1180, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'Y Locking Plate 1.5,4H*26.4mm', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01320', stock: null, cost: null },
+    { id: 1181, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'Y Locking Plate 1.5,6H*36.4mm', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01322', stock: null, cost: null },
+    { id: 1182, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'Y Locking Plate 1.5,8H*46.4mm', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01324', stock: null, cost: null },
+    { id: 1183, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'T Locking Plate, 1.5, head 4 holes,4H*24.5mm', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01325', stock: null, cost: null },
+    { id: 1184, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'T Locking Plate, 1.5, head 4 holes,6H*34.5mm', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01327', stock: null, cost: null },
+    { id: 1185, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'T Locking Plate, 1.5, head 3 holes,4H*24.5mm', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01329', stock: null, cost: null },
+    { id: 1186, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'T Locking Plate, 1.5, head 3 holes,6H*34.5mm', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01331', stock: null, cost: null },
+    { id: 1187, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'LCP Straight Plate, 1.5,6H*36mm', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01334', stock: null, cost: null },
+    { id: 1188, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'Condylar Locking Plate 1.5,4H*26.3mm', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01335', stock: null, cost: null },
+    { id: 1189, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'Strut Locking Plate 1.5,8H*23.3mmL', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01337', stock: null, cost: null },
+    { id: 1190, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'Strut Locking Plate 1.5,8H*23.3mmR', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01338', stock: null, cost: null }
   ];
 
   const CATEGORY_ORDER = ['screw-cortex', 'screw-locking', 'cannulated', 'kwire', 'plate', 'wire'];
@@ -388,6 +605,28 @@
   }
   function isHospitalVendor(vendor){ return vendor === 'รพ.'; }
 
+  // ---- vendor affinity (โจทย์ Kit): จำบริษัทของรายการที่ผู้ใช้ "เพิ่งเลือก" ล่าสุดทั้งใบ ----
+  // ใช้ดันบริษัทเดียวกันขึ้นก่อนในผลค้นหารายการถัดไปเท่านั้น — ไม่ตัด/ซ่อนบริษัทอื่นออกเด็ดขาด
+  // ลำดับความสำคัญ: 1) บริษัทที่เพิ่งกด pick ล่าสุด (_lastPickedVendor)
+  //                  2) ถ้ายังไม่เคย pick เลยในเซสชันนี้ (เช่น โหลดหน้าครั้งแรก) → fallback ไปดูรายการในใบ เอาอันล่าสุดที่มีอุปกรณ์
+  //                  3) ถ้าในใบยังไม่มีรายการเลย → คืน null (ไม่มี preference, เรียงปกติ รพ. ก่อนเป็นเดิม)
+  let _lastPickedVendor = null;
+  function getActiveVendor(){
+    if (_lastPickedVendor) return _lastPickedVendor;
+    let vendor = null;
+    document.querySelectorAll('.item').forEach(it => {
+      const device = findDevice(it.querySelector('.dev').value);
+      if (device) vendor = device.vendor;
+    });
+    return vendor;
+  }
+
+  function affinityHintHTML(activeVendor){
+    if (!activeVendor) return '';
+    const vb = vendorBadge(activeVendor);
+    return `<div class="vendor-affinity-hint">🔎 กำลังใช้ของ: <span class="src-badge ${vb.cls}">${vb.icon} ${escapeHtml(activeVendor)}</span> (ดันขึ้นก่อน — ยังเลือกบริษัทอื่นได้ตามปกติ)</div>`;
+  }
+
   function deviceOptionsHTML(selectedId){
     let html = '';
     CATEGORY_ORDER.forEach(catKey => {
@@ -440,6 +679,8 @@
 
   function onDeviceChange(sel){
     const it = sel.closest('.item');
+    const device = findDevice(sel.value);
+    if (device) _lastPickedVendor = device.vendor; // จำบริษัทล่าสุดที่ผู้ใช้เลือกทั้งใบ (ใช้ดันขึ้นก่อนในคอมโบถัดไป)
     updateItemInfo(it);
     calc();
   }
@@ -478,17 +719,24 @@
   }
 
   // จัดกลุ่มรายการที่ clinicalKey เดียวกัน (อุปกรณ์เดียวกันคนละบริษัท) ให้อยู่ติดกัน
-  // และให้แถว รพ. ขึ้นก่อนเสมอ (default ที่ปลอดภัยกว่า) โดยไม่กระทบลำดับของ clinicalKey อื่นที่ไม่เกี่ยวข้อง
+  // ลำดับภายในกลุ่ม: 1) บริษัทที่กำลังใช้อยู่ (vendor affinity, ถ้ามี) ก่อนเสมอ
+  //                  2) รพ. (default ที่ปลอดภัยกว่าเมื่อไม่มี preference) ถัดมา
+  //                  3) บริษัทอื่นๆ ตามลำดับเดิม — ไม่มีการตัดออก แค่เปลี่ยนลำดับ
   function sortForDisplay(items){
+    const activeVendor = getActiveVendor();
     const firstIndex = {};
     items.forEach((d, i) => {
       const k = d.clinicalKey || d.itemName;
       if (!(k in firstIndex)) firstIndex[k] = i;
     });
+    function rank(d){
+      if (activeVendor && d.vendor === activeVendor) return 0;
+      return isHospitalVendor(d.vendor) ? 1 : 2;
+    }
     return items.slice().sort((a, b) => {
       const ak = a.clinicalKey || a.itemName, bk = b.clinicalKey || b.itemName;
       if (ak !== bk) return firstIndex[ak] - firstIndex[bk];
-      return (isHospitalVendor(a.vendor) ? 0 : 1) - (isHospitalVendor(b.vendor) ? 0 : 1);
+      return rank(a) - rank(b);
     });
   }
 
@@ -520,7 +768,8 @@
   const MX_VENDOR_ORDER = ['รพ.', 'Emerson', 'Rockwood', 'MDC'];
 
   // แปลงผลค้นหาแบบแบน (allMatches) ให้เป็นโครง matrix: rows = ขนาด (clinicalKey), cols = บริษัทที่พบจริงในผลค้นหานี้
-  function buildMatrixModel(matches){
+  // activeVendor (ถ้ามี) จะถูกดันเป็นคอลัมน์ซ้ายสุด/ติดกับคอลัมน์ขนาด ก่อน รพ. เสมอ — คอลัมน์อื่นยังอยู่ครบ แค่เปลี่ยนลำดับ
+  function buildMatrixModel(matches, activeVendor){
     const rowOrder = [];
     const rowMap = {};
     matches.forEach(d => {
@@ -533,8 +782,11 @@
     });
     const seenVendors = [];
     matches.forEach(d => { if (!seenVendors.includes(d.vendor)) seenVendors.push(d.vendor); });
-    const cols = MX_VENDOR_ORDER.filter(v => seenVendors.includes(v))
-      .concat(seenVendors.filter(v => !MX_VENDOR_ORDER.includes(v)));
+    const baseOrder = activeVendor
+      ? [activeVendor, ...MX_VENDOR_ORDER.filter(v => v !== activeVendor)]
+      : MX_VENDOR_ORDER;
+    const cols = baseOrder.filter(v => seenVendors.includes(v))
+      .concat(seenVendors.filter(v => !baseOrder.includes(v)));
     return { rows: rowOrder.map(k => rowMap[k]), cols };
   }
 
@@ -550,8 +802,10 @@
 
   function renderMatrixInto(panel, matches){
     panel.classList.add('mx-mode');
-    const { rows, cols } = buildMatrixModel(matches);
-    let html = `<div class="mx-wrap">
+    const activeVendor = getActiveVendor();
+    const { rows, cols } = buildMatrixModel(matches, activeVendor);
+    let html = affinityHintHTML(activeVendor);
+    html += `<div class="mx-wrap">
       <div class="mx-toolbar">
         <span class="mx-title">⊞ ขนาด × บริษัท — พบ ${matches.length} รายการ · พิมพ์ต่อในช่องค้นหาด้านบนเพื่อกรองแถว</span>
         <button type="button" class="mx-close" data-mx-close title="ปิด กลับไปแบบลิสต์">✕</button>
@@ -559,10 +813,15 @@
       <table class="mx-table">
         <thead><tr>
           <th class="mx-col-size">ขนาด</th>
-          ${cols.map(v => {
+          ${cols.map((v, ci) => {
             const vb = vendorBadge(v);
             const isHosp = v === 'รพ.';
-            return `<th${isHosp ? ' class="mx-col-hosp"' : ''}>${vb.icon} ${escapeHtml(v)}</th>`;
+            const isActive = activeVendor && v === activeVendor;
+            const classes = [];
+            if (ci === 0) classes.push('mx-col-lead');
+            if (isHosp) classes.push('mx-col-hosp');
+            if (isActive) classes.push('mx-col-vendoractive');
+            return `<th${classes.length ? ` class="${classes.join(' ')}"` : ''}>${vb.icon} ${escapeHtml(v)}${isActive ? '<span class="mx-affinity-tag"> ★ ใช้อยู่</span>' : ''}</th>`;
           }).join('')}
         </tr></thead>
         <tbody>`;
@@ -570,14 +829,19 @@
       const row5 = ((i + 1) % 5 === 0) ? ' class="mx-row5"' : '';
       html += `<tr${row5}>
         <td class="mx-col-size">${escapeHtml(row.label)}</td>
-        ${cols.map(v => {
+        ${cols.map((v, ci) => {
           const isHosp = v === 'รพ.';
-          return `<td${isHosp ? ' class="mx-col-hosp"' : ''}>${matrixCellHTML(row.cells[v])}</td>`;
+          const isActive = activeVendor && v === activeVendor;
+          const classes = [];
+          if (ci === 0) classes.push('mx-col-lead');
+          if (isHosp) classes.push('mx-col-hosp');
+          if (isActive) classes.push('mx-col-vendoractive');
+          return `<td${classes.length ? ` class="${classes.join(' ')}"` : ''}>${matrixCellHTML(row.cells[v])}</td>`;
         }).join('')}
       </tr>`;
     });
     html += `</tbody></table>
-      <div class="mx-legend">● = มีสต็อก (เลขคือจำนวนคงเหลือ) · — = ไม่มีของบริษัทนี้ขนาดนี้ · 🟡 = สต็อก รพ. ใกล้หมด (≤ ${LOW_STOCK_THRESHOLD}) · คลิกจุด ● / 🟡 = เลือกขนาด+บริษัททันที</div>
+      <div class="mx-legend">● = มีสต็อก (เลขคือจำนวนคงเหลือ) · — = ไม่มีของบริษัทนี้ขนาดนี้ · 🟡 = สต็อก รพ. ใกล้หมด (≤ ${LOW_STOCK_THRESHOLD}) · คลิกจุด ● / 🟡 = เลือกขนาด+บริษัททันที${activeVendor ? ' · ★ = บริษัทที่กำลังใช้อยู่ (ดันขึ้นก่อน ไม่ตัดเจ้าอื่นออก)' : ''}</div>
     </div>`;
     panel.innerHTML = html;
   }
@@ -585,6 +849,7 @@
   function renderComboResults(combo, query){
     const panel = combo.querySelector('.dev-combo-panel');
     const allMatches = filterDevices(query);
+    const activeVendor = getActiveVendor();
 
     // หัวข้อ 10.3: สลับเป็น matrix อัตโนมัติเฉพาะตอน "พิมพ์ค้นหา" (query ไม่ว่าง) แล้วจำนวนแถวเกิน threshold
     // และผู้ใช้ยังไม่ได้กด ✕ ปิด matrix ของผลค้นหาปัจจุบันทิ้งไป
@@ -598,7 +863,8 @@
 
     panel.classList.remove('mx-mode');
     const flat = [];
-    let html = '';
+    const hintHTML = affinityHintHTML(activeVendor);
+    let html = hintHTML;
     CATEGORY_ORDER.forEach(catKey => {
       if (flat.length >= COMBO_MAX_RESULTS) return;
       let items = allMatches.filter(d => d.category === catKey);
@@ -612,8 +878,9 @@
         const vb = vendorBadge(d.vendor);
         const info = rightsInfo(d);
         const stockText = (d.stock != null) ? `เหลือ ${d.stock}` : '';
-        html += `<div class="dev-combo-opt" data-idx="${idx}" data-id="${d.id}" role="option">
-          <span class="dev-combo-opt-name">${escapeHtml(d.itemName)} <span class="src-badge ${vb.cls}">${vb.icon} ${escapeHtml(d.vendor)}</span></span>
+        const isAffinity = activeVendor && d.vendor === activeVendor;
+        html += `<div class="dev-combo-opt${isAffinity ? ' vendor-affinity' : ''}" data-idx="${idx}" data-id="${d.id}" role="option">
+          <span class="dev-combo-opt-name">${isAffinity ? '<span class="aff-dot" title="บริษัทที่กำลังใช้อยู่">●</span> ' : ''}${escapeHtml(d.itemName)} <span class="src-badge ${vb.cls}">${vb.icon} ${escapeHtml(d.vendor)}</span></span>
           <span class="dev-combo-opt-meta">${escapeHtml(codeLabel(d))}${info ? ' · ' + escapeHtml(info.unit) : ''}${stockText ? ' · ' + stockText : ''}</span>
         </div>`;
       });
@@ -621,7 +888,7 @@
     combo._flatList = flat;
     combo._activeIndex = flat.length ? 0 : -1;
     if (!flat.length) {
-      panel.innerHTML = `<div class="dev-combo-empty">ไม่พบอุปกรณ์ที่ตรงกับ "${escapeHtml(query)}"</div>`;
+      panel.innerHTML = hintHTML + `<div class="dev-combo-empty">ไม่พบอุปกรณ์ที่ตรงกับ "${escapeHtml(query)}"</div>`;
     } else {
       if (allMatches.length > flat.length) {
         html += `<div class="dev-combo-more">พบทั้งหมด ${allMatches.length} รายการ — แสดง ${flat.length} รายการแรก พิมพ์เพิ่มเติมเพื่อกรองให้แคบลง</div>`;
@@ -683,7 +950,7 @@
       select.value = device.id;      // ค่า numeric id เดิม — โค้ดเดิมที่อ่าน .dev.value ยังทำงานเหมือนเดิม
       input.value = device.itemName;
       if (reason) { it.dataset.crossVendorReason = reason; } else { delete it.dataset.crossVendorReason; }
-      onDeviceChange(select);        // trigger การอัปเดตรหัสเบิก/บริษัท/หน่วย/ราคา/ต้นทุนเหมือนเดิม
+      onDeviceChange(select);        // trigger การอัปเดตรหัสเบิก/บริษัท/หน่วย/ราคา/ต้นทุน + จำ vendor affinity เหมือนเดิม
     }
     function pick(device){
       close();
