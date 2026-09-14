@@ -57,6 +57,17 @@
   .combo-note { font-size: 11.5px; color: #6b7280; background: #fefce8; border: 1px solid #fde68a; border-radius: 8px; padding: 7px 10px; margin-top: 6px; line-height: 1.5; }
   .combo-note .cn-strong { font-weight: 700; color: #b45309; }
   .item .del { position: absolute; top: 8px; right: 10px; background: #fee2e2; color: #b91c1c; border: none; border-radius: 6px; padding: 3px 9px; font-size: 12px; cursor: pointer; }
+  .item-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+  .tpl-wrap { position: relative; }
+  .tpl-menu { display: none; position: absolute; top: calc(100% + 6px); left: 0; z-index: 40;
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,.15);
+    min-width: 260px; overflow: hidden; }
+  .tpl-menu.open { display: block; }
+  .tpl-title { font-size: 11.5px; font-weight: 700; color: #0f766e; padding: 8px 12px; border-bottom: 1px solid #f1f5f9; }
+  .tpl-menu button { display: block; width: 100%; text-align: left; padding: 9px 12px; border: none;
+    background: none; cursor: pointer; font-size: 13px; font-family: inherit; color: #1e293b; }
+  .tpl-menu button:hover { background: #f0fdfa; }
+  .tpl-future { font-size: 11.5px; color: #94a3b8; padding: 8px 12px; border-top: 1px solid #f1f5f9; }
   .flag { display: inline-block; font-size: 11px; background: #fef9c3; color: #854d0e; border-radius: 5px; padding: 2px 6px; margin-left: 6px; }
   .vendor-hint { font-size: 11.5px; color: #6b7280; margin-top: 3px; }
   .vendor-display {
@@ -237,7 +248,19 @@
     <div class="section">
       <h2>2 · รายการอุปกรณ์ที่ใช้</h2>
       <div id="items"></div>
-      <button class="btn secondary" onclick="addItem()">＋ เพิ่มรายการอีกขนาด/ชนิด</button>
+      <div class="item-actions">
+        <button class="btn secondary" onclick="addItem()">＋ เพิ่มรายการอีกขนาด/ชนิด</button>
+        <div class="tpl-wrap">
+          <button type="button" class="btn secondary" id="tplBtn" onclick="toggleTplMenu()">📋 Templates ▾</button>
+          <div class="tpl-menu" id="tplMenu">
+            <div class="tpl-title">เลือกชุดอุปกรณ์สำเร็จรูป</div>
+            <button type="button" data-tpl="ORIF" onclick="applyTemplate('ORIF')">🔩 ORIF — Plate + Screws</button>
+            <button type="button" data-tpl="TKA"  onclick="applyTemplate('TKA')">🦴 TKA — Implant + Cement</button>
+            <button type="button" data-tpl="THA"  onclick="applyTemplate('THA')">🦴 THA — Implant + Cement</button>
+            <div class="tpl-future">＋ ออกแบบ Template เวอร์ชันถัดไป</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="warn" id="nowarn">⚠️ สิทธิที่เลือกยังไม่มีราคาเบิกสำหรับอุปกรณ์บางรายการ (เช่น Cerclage wire สิทธิ UCS) — ระบบจะบันทึกได้ในกรณีฉุกเฉิน แต่ flag ส่งให้การเงินตรวจสอบ และไม่พิมพ์ใบเบิกสำหรับรายการนั้น</div>
@@ -535,17 +558,23 @@
     { id: 1187, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'LCP Straight Plate, 1.5,6H*36mm', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01334', stock: null, cost: null },
     { id: 1188, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'Condylar Locking Plate 1.5,4H*26.3mm', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01335', stock: null, cost: null },
     { id: 1189, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'Strut Locking Plate 1.5,8H*23.3mmL', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01337', stock: null, cost: null },
-    { id: 1190, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'Strut Locking Plate 1.5,8H*23.3mmR', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01338', stock: null, cost: null }
+    { id: 1190, category: 'plate', family: 'เพลทมินิ 1.5mm (Mini Fragment Hand Set)', itemName: 'Strut Locking Plate 1.5,8H*23.3mmR', vendor: 'Emerson', code: '', variant: '', clinicalKey: 'emerson-f14ab-pa01338', stock: null, cost: null },
+    // ---- Device เฉพาะเคส implant/cement (id 2000+) — รหัสเบิก 79xx; ราคายัง null (รอข้อมูล) ----
+    { id: 2001, category: 'implant', family: 'TKA Implant (ข้อเข่าเทียม)', itemName: 'TKA Implant Set (ข้อเข่าเทียม)', vendor: 'รพ.', code: '7901', variant: '', clinicalKey: 'implant-tka', stock: null, cost: null },
+    { id: 2002, category: 'implant', family: 'THA Implant (ข้อสะโพกเทียม)', itemName: 'THA Implant Set (ข้อสะโพกเทียม)', vendor: 'รพ.', code: '7903', variant: '', clinicalKey: 'implant-tha', stock: null, cost: null },
+    { id: 2003, category: 'cement', family: 'Bone Cement (ปูนยึดข้อเทียม)', itemName: 'Bone Cement Set (ปูนยึดข้อเทียม)', vendor: 'รพ.', code: '7902', variant: '', clinicalKey: 'cement', stock: null, cost: null }
   ];
 
-  const CATEGORY_ORDER = ['screw-cortex', 'screw-locking', 'cannulated', 'kwire', 'plate', 'wire'];
+  const CATEGORY_ORDER = ['screw-cortex', 'screw-locking', 'cannulated', 'kwire', 'plate', 'wire', 'implant', 'cement'];
   const CATEGORIES = {
     'screw-cortex':  { label: 'Cortex screws',      icon: '🔩' },
     'screw-locking': { label: 'Locking screws',     icon: '🔩' },
     'cannulated':    { label: 'Cannulated screws',  icon: '🔩' },
     'kwire':         { label: 'K-wire',             icon: '📌' },
     'plate':         { label: 'เพลท',               icon: '🛡️' },
-    'wire':          { label: 'ลวด',                icon: '🧵' }
+    'wire':          { label: 'ลวด',                icon: '🧵' },
+    'implant':       { label: 'ข้อเทียม (Joint Implant)', icon: '🦴' },
+    'cement':        { label: 'ปูนยึดข้อเทียม (Bone Cement)', icon: '🧱' }
   };
 
   // ราคา 5 สิทธิ์ต่อรหัส — เฉพาะรหัสที่ใช้จริงในรายการอุปกรณ์ข้างต้น (จาก RIGHTS ในหน้า device_mapping.html)
@@ -567,7 +596,14 @@
         A: { label: 'A — Locking compression plate', prices: { UCS: 10000, OFC: 10000, LGO: 10000, NHS: 10000, PVT: 10000 } },
         B: { label: 'B — ชนิดหัวล็อกสำหรับใส่ข้อ (Distal radius)', prices: { UCS: 17000, OFC: 17000, LGO: 17000, NHS: 17000, PVT: 17000 } }
       }
-    }
+    },
+    // ---- รหัสเฉพาะเคส implant (79xx) — ยังไม่มีราคาใน GSheet สิทธิ์: price = null ทุกสิทธิ์ (รอข้อมูล) ----
+    '7901': { name: 'ข้อเข่าเทียม (TKA Implant)', short: 'TKA Implant', unit: 'ชุด',
+      prices: { UCS: null, OFC: null, LGO: null, NHS: null, PVT: null } },
+    '7902': { name: 'ปูนซีเมนต์สำหรับยึดข้อเทียม (Bone Cement)', short: 'Cement', unit: 'ชุด',
+      prices: { UCS: null, OFC: null, LGO: null, NHS: null, PVT: null } },
+    '7903': { name: 'ข้อสะโพกเทียม (THA Implant)', short: 'THA Implant', unit: 'ชุด',
+      prices: { UCS: null, OFC: null, LGO: null, NHS: null, PVT: null } }
   };
 
   function fmt(n){ return n.toLocaleString('th-TH'); }
@@ -1026,6 +1062,47 @@
       refresh('');
       input.focus();
     });
+  }
+
+  function toggleTplMenu(){ document.getElementById('tplMenu').classList.toggle('open'); }
+  document.addEventListener('click', e => {
+    const m = document.getElementById('tplMenu');
+    if (m && m.classList.contains('open') && !e.target.closest('.tpl-wrap')) m.classList.remove('open');
+  });
+
+  // Template: เติมแถวอุปกรณ์เริ่มต้นให้ผู้ใช้ (ยังต้องปรับ/ยืนยันจริง ไม่บันทึกอัตโนมัติ)
+  const TEMPLATES = {
+    ORIF: [ // Plate (catalog) + Screws — เลือกขนาด/บริษัทจริงผ่าน combobox; รหัสเด้งตามหมวด
+      { find: d => d.category === 'plate' && d.code === '7214', label: '🔩 ORIF — Locking Plate', qty: 1 },
+      { find: d => d.category === 'screw-cortex' && d.code === '7302', label: '🔩 ORIF — Cortex Screw', qty: 6 }
+    ],
+    TKA: [ // implant + cement — เป็นรหัสเบิก 79xx
+      { find: d => d.id === 2001, label: '🦴 TKA Implant', qty: 1 },
+      { find: d => d.id === 2003, label: '🧱 Bone Cement', qty: 1 }
+    ],
+    THA: [
+      { find: d => d.id === 2002, label: '🦴 THA Implant', qty: 1 },
+      { find: d => d.id === 2003, label: '🧱 Bone Cement', qty: 1 }
+    ]
+  };
+  function applyTemplate(type){
+    document.getElementById('tplMenu').classList.remove('open');
+    const tpl = TEMPLATES[type];
+    if (!tpl) return;
+    let firstAdded = false;
+    tpl.forEach(slot => {
+      const dev = DEVICES.find(slot.find);
+      if (!dev) return;
+      addItem(dev.id);
+      const items = document.querySelectorAll('.item');
+      const it = items[items.length - 1];
+      if (it) {
+        const q = it.querySelector('.qty'); if (q) q.value = slot.qty;
+        if (!firstAdded) { firstAdded = true; it.scrollIntoView({ behavior:'smooth', block:'center' }); }
+      }
+    });
+    calc();
+    alert('📋 เติม Template "' + type + '" แล้ว (' + tpl.length + ' รายการ) — ปรับขนาด/บริษัท/จำนวนจริงแล้วยืนยันบันทึก');
   }
 
   function addItem(deviceId){
