@@ -630,7 +630,7 @@
   }
 
   function deviceOptionsHTML(selectedId){
-    let html = '';
+    let html = '<option value="">-- เลือกอุปกรณ์ --</option>';
     CATEGORY_ORDER.forEach(catKey => {
       const items = DEVICES.filter(d => d.category === catKey);
       if (!items.length) return;
@@ -1029,7 +1029,7 @@
   }
 
   function addItem(deviceId){
-    deviceId = deviceId || DEVICES[0].id;
+    deviceId = deviceId || '';   // เริ่มค่าว่าง — ให้ผู้ใช้ค้นหา/เลือกอุปกรณ์เอง (ไม่ pre-select ตอนนี้เป็น screw)
     const box = document.getElementById('items');
     const d = document.createElement('div');
     d.className = 'item';
@@ -1161,8 +1161,7 @@
 
   // init
   document.getElementById('sdate').value = new Date().toISOString().slice(0,10);
-  addItem(1);
-  document.querySelector('.item .qty').value = 2;
+  addItem();   // เริ่มค่าว่าง — ผู้ใช้ต้องเลือกอุปกรณ์เอง
   calc();
 </script>
 </body>
