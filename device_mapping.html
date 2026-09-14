@@ -268,6 +268,25 @@
   .conflict-banner ul { margin: 0; padding-left: 20px; }
   .conflict-banner li { margin-bottom: 3px; }
 
+  /* --- ป๊อปอัปอุปกรณ์ที่ยังไม่จับคู่ --- */
+  .um-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.45);
+    align-items: center; justify-content: center; padding: 16px; z-index: 50; }
+  .um-overlay.open { display: flex; }
+  .um-modal { background: #fff; border-radius: 14px; max-width: 560px; width: 100%;
+    max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,.3); }
+  .um-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px;
+    border-bottom: 1px solid #e5e7eb; background: #fffbeb; border-radius: 14px 14px 0 0; }
+  .um-head h3 { font-size: 15px; color: #b45309; margin: 0; }
+  .um-close { background: none; border: none; font-size: 16px; cursor: pointer; color: #6b7280; padding: 2px 6px; }
+  .um-body { padding: 12px 18px; overflow-y: auto; font-size: 13px; }
+  .um-body.done { color: #0f766e; font-weight: 600; text-align: center; padding: 24px; }
+  .um-item { display: flex; justify-content: space-between; gap: 10px; padding: 7px 6px;
+    border-bottom: 1px dashed #f3f4f6; align-items: baseline; }
+  .um-item:last-child { border-bottom: none; }
+  .um-name { font-weight: 600; color: #111827; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .um-meta { color: #6b7280; font-size: 12px; white-space: nowrap; }
+  .um-foot { padding: 12px 18px; border-top: 1px solid #e5e7eb; text-align: right; }
+
   /* --- แถวลูกในกลุ่ม clinicalKey เดียวกัน (คนละบริษัท) จัดชิดกันใต้แถวแรกของกลุ่ม --- */
   tr.group-child td:first-child {
     border-left: 3px solid #5eead4;
@@ -350,8 +369,25 @@
 
 <footer class="bar">
   <div class="bar-count">จับคู่แล้ว <b id="matchedCount">0</b> / <span id="totalCount">0</span> รายการ</div>
-  <button class="primary" id="saveBtn">💾 บันทึก</button>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+    <button class="secondary" id="showUnmatchedBtn" style="display:none;">⏳ ยังไม่จับคู่ (<span id="unmatchedCount">0</span>)</button>
+    <button class="primary" id="saveBtn">💾 บันทึก</button>
+  </div>
 </footer>
+
+<!-- ป๊อปอัปแจ้งรายการที่ยังไม่จับคู่ -->
+<div class="um-overlay" id="umOverlay">
+  <div class="um-modal">
+    <div class="um-head">
+      <h3>⏳ อุปกรณ์ที่ยังไม่จับคู่รหัสเบิก (<span id="umCount">0</span>)</h3>
+      <button class="um-close" id="umClose" title="ปิด">✕</button>
+    </div>
+    <div class="um-body" id="umBody"></div>
+    <div class="um-foot">
+      <button class="secondary" id="umConfirm">รับทราบ</button>
+    </div>
+  </div>
+</div>
 
 <script>
   // สิทธิ์ที่รองรับ + ลำดับแสดงผล
@@ -699,6 +735,7 @@
     });
     tbody.innerHTML = html;
     updateFooter();
+    refreshUnmatched();
   }
 
   function updateFooter() {
@@ -706,6 +743,37 @@
     document.getElementById('matchedCount').textContent = matched;
     document.getElementById('totalCount').textContent = devices.length;
   }
+
+  // ---- ป๊อปอัปแจ้งรายการที่ยังไม่จับคู่ ----
+  function refreshUnmatched() {
+    const unm = devices.filter(d => !isMatched(d));
+    const n = unm.length;
+    const btn = document.getElementById('showUnmatchedBtn');
+    const btnCount = document.getElementById('unmatchedCount');
+    btnCount.textContent = n;
+    btn.style.display = n > 0 ? 'inline-block' : 'none';
+    document.getElementById('umCount').textContent = n;
+    const body = document.getElementById('umBody');
+    if (n === 0) {
+      body.className = 'um-body done';
+      body.innerHTML = '✅ ทุกอุปกรณ์จับคู่รหัสเบิกแล้ว';
+    } else {
+      body.className = 'um-body';
+      body.innerHTML = unm.map(d => {
+        const vb = d.vendor || '—';
+        return '<div class="um-item"><span class="um-name" title="' + escapeHtml(d.itemName) + '">' +
+          escapeHtml(d.itemName) + '</span><span class="um-meta">' + escapeHtml(vb) + ' · ' +
+          (d.clinicalKey ? escapeHtml(d.clinicalKey) : '') + '</span></div>';
+      }).join('');
+    }
+  }
+  function openUnmatchedPopup() { refreshUnmatched(); document.getElementById('umOverlay').classList.add('open'); }
+  function closeUnmatchedPopup() { document.getElementById('umOverlay').classList.remove('open'); }
+
+  document.getElementById('showUnmatchedBtn').addEventListener('click', openUnmatchedPopup);
+  document.getElementById('umClose').addEventListener('click', closeUnmatchedPopup);
+  document.getElementById('umConfirm').addEventListener('click', closeUnmatchedPopup);
+  document.getElementById('umOverlay').addEventListener('click', e => { if (e.target.id === 'umOverlay') closeUnmatchedPopup(); });
 
   document.getElementById('tbody').addEventListener('change', e => {
     const tr = e.target.closest('tr');
@@ -791,6 +859,7 @@
 
   populateCategoryFilter();
   renderTable();
+  if (devices.filter(d => !isMatched(d)).length > 0) openUnmatchedPopup();
 </script>
 
 </body>
