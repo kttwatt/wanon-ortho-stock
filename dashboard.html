@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard เคสผ่าตัด — ศัลยกรรมกระดูก</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Noto Sans Thai", "Sarabun", system-ui, sans-serif; background: #f2f4f8; color: #1e293b; padding: 20px; }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  header { background: #0f766e; color: #fff; padding: 16px 20px; border-radius: 12px 12px 0 0; }
+  header h1 { font-size: 18px; }
+  header p { font-size: 13px; opacity: .85; margin-top: 4px; }
+  nav.pagenav { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  nav.pagenav a {
+    font-size: 12px; color: #fff; text-decoration: none;
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35);
+    padding: 5px 11px; border-radius: 999px; font-weight: 600;
+  }
+  nav.pagenav a:hover { background: rgba(255,255,255,.25); }
+  nav.pagenav a.current { background: #fff; color: #0f766e; border-color: #fff; }
+  .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 0 0 12px 12px; padding: 20px; }
+  .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+  .toolbar .hint { font-size: 12.5px; color: #64748b; }
+  .btn { display: inline-block; background: #0f766e; color: #fff; border: none; border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; }
+  .btn:hover { opacity: .9; }
+  .btn.secondary { background: #fff; color: #0f766e; border: 1.5px solid #0f766e; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; }
+  thead th {
+    text-align: left; font-size: 12px; color: #0f766e; background: #f0fdfa;
+    padding: 9px 10px; border-bottom: 2px solid #ccfbf1; white-space: nowrap;
+  }
+  tbody td { padding: 10px 10px; border-bottom: 1px solid #eef2f6; vertical-align: middle; }
+  tbody tr.caserow { cursor: pointer; transition: background .12s; }
+  tbody tr.caserow:hover { background: #f7fffe; }
+  .hn { font-weight: 700; color: #1e293b; }
+  .pname { color: #334155; }
+  .subtype { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #eef2f6; color: #475569; }
+  .subtype.orif { background: #dbeafe; color: #1e40af; }
+  .subtype.tka  { background: #dcfce7; color: #166534; }
+  .subtype.tha  { background: #fef3c7; color: #92400e; }
+  .subtype.other{ background: #f3e8ff; color: #6b21a8; }
+  .right-tag { font-size: 11.5px; color: #64748b; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .badge.done  { background: #dcfce7; color: #166534; }
+  .badge.pending { background: #fef9c3; color: #854d0e; }
+  .badge.empty { background: #f1f5f9; color: #64748b; }
+  .pickbtn {
+    background: #0f766e; color: #fff; border: none; border-radius: 7px;
+    padding: 6px 12px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  }
+  .pickbtn:hover { opacity: .9; }
+  footer { margin-top: 16px; text-align: center; font-size: 12px; color: #94a3b8; }
+  @media (max-width: 720px) {
+    .col-doc, .col-room { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>📋 Dashboard เคสผ่าตัด</h1>
+    <p>รายชื่อผู้ป่วยที่มีคิวผ่าตัด — คลิกเลือกเคสเพื่อไปกรอกบันทึกการใช้อุปกรณ์ · demo — ข้อมูลสมมติทั้งหมด ยังไม่เชื่อมฐานข้อมูลจริง</p>
+    <nav class="pagenav">
+      <a href="dashboard.html" class="current">📋 Dashboard</a>
+      <a href="lockingscrew35_usage_form.html">📋 บันทึกการใช้อุปกรณ์</a>
+      <a href="device_mapping.html">🔗 จับคู่-รหัสเบิก</a>
+      <a href="edit_claim_code.html">🛠️ แก้ไขรหัสเบิก</a>
+    </nav>
+  </header>
+
+  <div class="card">
+    <div class="toolbar">
+      <span class="hint">👆 คลิกที่แถว หรือกด "เลือกเคส" เพื่อไปกรอกฟอร์มบันทึกการใช้อุปกรณ์ของเคสนั้น</span>
+      <button class="btn" onclick="location.href='lockingscrew35_usage_form.html'">＋ เคสใหม่</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>HN</th>
+          <th>ชื่อผู้ป่วย</th>
+          <th>การผ่าตัด</th>
+          <th>วันที่</th>
+          <th class="col-room">OR</th>
+          <th class="col-doc">แพทย์</th>
+          <th>สิทธิ</th>
+          <th>สถานะ</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="caseBody"></tbody>
+    </table>
+  </div>
+  <footer>ผู้ใช้งาน: kttwatt@gmail.com · demo dashboard — ยังไม่เชื่อมฐานข้อมูลจริง</footer>
+</div>
+
+<script>
+  // ---- ข้อมูลเคส demo (seed) — สมมติทั้งหมด ----
+  const CASES = [
+    { hn: '68-00231', name: 'นายสมชาย ใจดี',      type: 'ORIF', date: '2026-09-15', room: 'OR-1', doc: 'นพ. ศัลยกรรมกระดูก 1', right: 'UCS', status: 'done' },
+    { hn: '68-00232', name: 'นางสมหญิง แสงทอง',    type: 'TKA',  date: '2026-09-15', room: 'OR-2', doc: 'นพ. ศัลยกรรมกระดูก 2', right: 'OFC', status: 'pending' },
+    { hn: '68-00233', name: 'นายประเสริฐ พงษ์ไพร', type: 'ORIF', date: '2026-09-15', room: 'OR-3', doc: 'พญ. ศัลยกรรมกระดูก',    right: 'PVT', status: 'empty' },
+    { hn: '68-00234', name: 'นางสาวกัลยา รุ่งเรือง', type: 'THA', date: '2026-09-16', room: 'OR-1', doc: 'นพ. ศัลยกรรมกระดูก 1', right: 'NHS', status: 'pending' },
+    { hn: '68-00235', name: 'นายวิชัย ศรีสุข',      type: 'ORIF', date: '2026-09-16', room: 'OR-4', doc: 'นพ. ศัลยกรรมกระดูก 2', right: 'LGO', status: 'empty' },
+    { hn: '68-00236', name: 'นางบุญมี อ่อนจันทร์',  type: 'TKA',  date: '2026-09-16', room: 'OR-2', doc: 'พญ. ศัลยกรรมกระดูก',    right: 'UCS', status: 'done' },
+    { hn: '68-00237', name: 'นายอนุชา เจริญสุข',    type: 'อื่น', date: '2026-09-17', room: 'OR-3', doc: 'นพ. ศัลยกรรมกระดูก 1', right: 'OFC', status: 'empty' },
+    { hn: '68-00238', name: 'นางสาวพิมพ์ใจ วงศ์งาม', type: 'THA', date: '2026-09-17', room: 'OR-1', doc: 'นพ. ศัลยกรรมกระดูก 2', right: 'PVT', status: 'pending' },
+    { hn: '68-00239', name: 'นายธีรพงษ์ มั่นคง',    type: 'ORIF', date: '2026-09-17', room: 'OR-2', doc: 'พญ. ศัลยกรรมกระดูก',    right: 'UCS', status: 'empty' },
+    { hn: '68-00240', name: 'นางละออง ทิพย์วงศ์',   type: 'TKA',  date: '2026-09-18', room: 'OR-4', doc: 'นพ. ศัลยกรรมกระดูก 1', right: 'NHS', status: 'done' }
+  ];
+
+  const RIGHT_LABEL = { OFC: 'ข้าราชการ (OFC)', UCS: 'UC/บัตรทอง (UCS)', LGO: 'อปท. (LGO)', NHS: 'สปสช. (NHS)', PVT: 'ชำระเอง (PVT)' };
+  const TYPE_CLASS = { ORIF: 'orif', TKA: 'tka', THA: 'tha' };
+  const STATUS_INFO = {
+    done:    { cls: 'done',    label: '✅ บันทึกแล้ว' },
+    pending: { cls: 'pending', label: '🕓 รอกรอก' },
+    empty:   { cls: 'empty',   label: '⬜ ว่าง' }
+  };
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+
+  function fmtDate(iso){
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  function goToCase(c){
+    const params = new URLSearchParams({
+      hn: c.hn + ' / ' + c.name,
+      date: c.date,
+      room: c.room,
+      doc: c.doc,
+      right: c.right
+    });
+    location.href = 'lockingscrew35_usage_form.html?' + params.toString();
+  }
+
+  function render(){
+    const body = document.getElementById('caseBody');
+    body.innerHTML = CASES.map((c, i) => {
+      const typeCls = TYPE_CLASS[c.type] || 'other';
+      const st = STATUS_INFO[c.status];
+      return `<tr class="caserow" data-idx="${i}">
+        <td class="hn">${escapeHtml(c.hn)}</td>
+        <td class="pname">${escapeHtml(c.name)}</td>
+        <td><span class="subtype ${typeCls}">${escapeHtml(c.type)}</span></td>
+        <td>${fmtDate(c.date)}</td>
+        <td class="col-room">${escapeHtml(c.room)}</td>
+        <td class="col-doc">${escapeHtml(c.doc)}</td>
+        <td class="right-tag">${escapeHtml(RIGHT_LABEL[c.right] || c.right)}</td>
+        <td><span class="badge ${st.cls}">${st.label}</span></td>
+        <td><button type="button" class="pickbtn" data-idx="${i}">เลือกเคส →</button></td>
+      </tr>`;
+    }).join('');
+
+    body.querySelectorAll('.caserow').forEach(row => {
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('.pickbtn')) return; // ปุ่มมี handler ของตัวเอง กันคลิกซ้ำ
+        goToCase(CASES[Number(row.dataset.idx)]);
+      });
+    });
+    body.querySelectorAll('.pickbtn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        goToCase(CASES[Number(btn.dataset.idx)]);
+      });
+    });
+  }
+
+  render();
+</script>
+</body>
+</html>
